@@ -1,5 +1,6 @@
 package com.example.footbook.entity;
 
+import com.example.footbook.enums.BookingStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

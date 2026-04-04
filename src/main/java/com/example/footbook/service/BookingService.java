@@ -2,7 +2,7 @@ package com.example.footbook.service;
 
 import com.example.footbook.dto.BookingRequestDto;
 import com.example.footbook.entity.Booking;
-import com.example.footbook.entity.BookingStatus;
+import com.example.footbook.enums.BookingStatus;
 import com.example.footbook.repository.BookingRepository;
 import org.springframework.stereotype.Service;
 

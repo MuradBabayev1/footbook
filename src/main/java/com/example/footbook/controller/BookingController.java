@@ -4,7 +4,7 @@ import com.example.footbook.dto.BookingRequestDto;
 import com.example.footbook.dto.BookingResponseDto;
 import com.example.footbook.dto.BookingStatusUpdateRequestDto;
 import com.example.footbook.entity.Booking;
-import com.example.footbook.entity.BookingStatus;
+import com.example.footbook.enums.BookingStatus;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;

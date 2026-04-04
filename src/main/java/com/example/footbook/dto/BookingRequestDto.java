@@ -1,6 +1,6 @@
 package com.example.footbook.dto;
 
-import com.example.footbook.entity.BookingStatus;
+import com.example.footbook.enums.BookingStatus;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
