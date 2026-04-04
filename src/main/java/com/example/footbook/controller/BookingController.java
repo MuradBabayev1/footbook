@@ -1,5 +1,8 @@
 package com.example.footbook.controller;
 
+import com.example.footbook.dto.BookingRequestDto;
+import com.example.footbook.dto.BookingResponseDto;
+import com.example.footbook.dto.BookingStatusUpdateRequestDto;
 import com.example.footbook.entity.Booking;
 import com.example.footbook.entity.BookingStatus;
 import org.springframework.http.HttpStatus;
@@ -15,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -29,25 +31,26 @@ public class BookingController {
     private final AtomicLong sequence = new AtomicLong(1);
 
     @GetMapping
-    public List<Booking> getAllBookings(@RequestParam(required = false) Long userId,
-                                        @RequestParam(required = false) Long stadiumId) {
+    public List<BookingResponseDto> getAllBookings(@RequestParam(required = false) Long userId,
+                                                   @RequestParam(required = false) Long stadiumId) {
         return bookings.values().stream()
                 .filter(booking -> userId == null || booking.getUserId().equals(userId))
                 .filter(booking -> stadiumId == null || booking.getStadiumId().equals(stadiumId))
+                .map(BookingResponseDto::fromEntity)
                 .toList();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Booking> getBookingById(@PathVariable Long id) {
+    public ResponseEntity<BookingResponseDto> getBookingById(@PathVariable Long id) {
         Booking booking = bookings.get(id);
         if (booking == null) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(booking);
+        return ResponseEntity.ok(BookingResponseDto.fromEntity(booking));
     }
 
     @PostMapping
-    public ResponseEntity<?> createBooking(@RequestBody Booking payload) {
+    public ResponseEntity<?> createBooking(@RequestBody BookingRequestDto payload) {
         if (payload.getUserId() == null || payload.getUserId() <= 0) {
             return ResponseEntity.badRequest().body("userId must be greater than zero");
         }
@@ -70,28 +73,41 @@ public class BookingController {
             return ResponseEntity.badRequest().body("attendees must be greater than zero");
         }
 
+        Booking booking = new Booking();
+        booking.setUserId(payload.getUserId());
+        booking.setStadiumId(payload.getStadiumId());
+        booking.setMatchTitle(payload.getMatchTitle());
+        booking.setBookingDate(payload.getBookingDate());
+        booking.setStartTime(payload.getStartTime());
+        booking.setEndTime(payload.getEndTime());
+        booking.setAttendees(payload.getAttendees());
+        booking.setStatus(payload.getStatus());
+
         long id = sequence.getAndIncrement();
-        payload.setId(id);
-        payload.setCreatedAt(LocalDateTime.now());
-        if (payload.getStatus() == null) {
-            payload.setStatus(BookingStatus.PENDING);
+        booking.setId(id);
+        booking.setCreatedAt(LocalDateTime.now());
+        if (booking.getStatus() == null) {
+            booking.setStatus(BookingStatus.PENDING);
         }
 
-        bookings.put(id, payload);
-        return ResponseEntity.status(HttpStatus.CREATED).body(payload);
+        bookings.put(id, booking);
+        return ResponseEntity.status(HttpStatus.CREATED).body(BookingResponseDto.fromEntity(booking));
     }
 
     @PatchMapping("/{id}/status")
     public ResponseEntity<?> updateBookingStatus(@PathVariable Long id,
-                                                 @RequestParam BookingStatus status) {
+                                                 @RequestBody BookingStatusUpdateRequestDto payload) {
         Booking booking = bookings.get(id);
         if (booking == null) {
             return ResponseEntity.notFound().build();
         }
+        if (payload.getStatus() == null) {
+            return ResponseEntity.badRequest().body("status is required");
+        }
 
-        booking.setStatus(status);
+        booking.setStatus(payload.getStatus());
         bookings.put(id, booking);
-        return ResponseEntity.ok(booking);
+        return ResponseEntity.ok(BookingResponseDto.fromEntity(booking));
     }
 
     @DeleteMapping("/{id}")

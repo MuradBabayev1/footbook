@@ -1,5 +1,7 @@
 package com.example.footbook.controller;
 
+import com.example.footbook.dto.StadiumRequestDto;
+import com.example.footbook.dto.StadiumResponseDto;
 import com.example.footbook.entity.Stadium;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -27,29 +28,32 @@ public class StadiumController {
     private final AtomicLong sequence = new AtomicLong(1);
 
     @GetMapping
-    public List<Stadium> getAllStadiums() {
-        return new ArrayList<>(stadiums.values());
+    public List<StadiumResponseDto> getAllStadiums() {
+        return stadiums.values().stream()
+                .map(StadiumResponseDto::fromEntity)
+                .toList();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Stadium> getStadiumById(@PathVariable Long id) {
+    public ResponseEntity<StadiumResponseDto> getStadiumById(@PathVariable Long id) {
         Stadium stadium = stadiums.get(id);
         if (stadium == null) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(stadium);
+        return ResponseEntity.ok(StadiumResponseDto.fromEntity(stadium));
     }
 
     @GetMapping("/available")
-    public List<Stadium> getAvailableStadiums(@RequestParam(required = false) String city) {
+    public List<StadiumResponseDto> getAvailableStadiums(@RequestParam(required = false) String city) {
         return stadiums.values().stream()
                 .filter(Stadium::getAvailable)
                 .filter(stadium -> city == null || stadium.getCity().equalsIgnoreCase(city))
+                .map(StadiumResponseDto::fromEntity)
                 .toList();
     }
 
     @PostMapping
-    public ResponseEntity<?> createStadium(@RequestBody Stadium payload) {
+    public ResponseEntity<?> createStadium(@RequestBody StadiumRequestDto payload) {
         if (payload.getName() == null || payload.getName().isBlank()) {
             return ResponseEntity.badRequest().body("name is required");
         }
@@ -63,18 +67,25 @@ public class StadiumController {
             return ResponseEntity.badRequest().body("capacity must be greater than zero");
         }
 
+        Stadium stadium = new Stadium();
+        stadium.setName(payload.getName());
+        stadium.setCity(payload.getCity());
+        stadium.setLocation(payload.getLocation());
+        stadium.setCapacity(payload.getCapacity());
+        stadium.setAvailable(payload.getAvailable());
+
         long id = sequence.getAndIncrement();
-        payload.setId(id);
-        if (payload.getAvailable() == null) {
-            payload.setAvailable(true);
+        stadium.setId(id);
+        if (stadium.getAvailable() == null) {
+            stadium.setAvailable(true);
         }
 
-        stadiums.put(id, payload);
-        return ResponseEntity.status(HttpStatus.CREATED).body(payload);
+        stadiums.put(id, stadium);
+        return ResponseEntity.status(HttpStatus.CREATED).body(StadiumResponseDto.fromEntity(stadium));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateStadium(@PathVariable Long id, @RequestBody Stadium payload) {
+    public ResponseEntity<?> updateStadium(@PathVariable Long id, @RequestBody StadiumRequestDto payload) {
         Stadium existing = stadiums.get(id);
         if (existing == null) {
             return ResponseEntity.notFound().build();
@@ -97,7 +108,7 @@ public class StadiumController {
         }
 
         stadiums.put(id, existing);
-        return ResponseEntity.ok(existing);
+        return ResponseEntity.ok(StadiumResponseDto.fromEntity(existing));
     }
 
     @DeleteMapping("/{id}")

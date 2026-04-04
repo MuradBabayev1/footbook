@@ -1,5 +1,7 @@
 package com.example.footbook.controller;
 
+import com.example.footbook.dto.UserRequestDto;
+import com.example.footbook.dto.UserResponseDto;
 import com.example.footbook.entity.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,21 +28,23 @@ public class UserController {
     private final AtomicLong sequence = new AtomicLong(1);
 
     @GetMapping
-    public List<User> getAllUsers() {
-        return new ArrayList<>(users.values());
+    public List<UserResponseDto> getAllUsers() {
+        return users.values().stream()
+                .map(UserResponseDto::fromEntity)
+                .toList();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Long id) {
+    public ResponseEntity<UserResponseDto> getUserById(@PathVariable Long id) {
         User existingUser = users.get(id);
         if (existingUser == null) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(existingUser);
+        return ResponseEntity.ok(UserResponseDto.fromEntity(existingUser));
     }
 
     @PostMapping
-    public ResponseEntity<?> createUser(@RequestBody User payload) {
+    public ResponseEntity<?> createUser(@RequestBody UserRequestDto payload) {
         if (payload.getFullName() == null || payload.getFullName().isBlank()) {
             return ResponseEntity.badRequest().body("fullName is required");
         }
@@ -51,15 +55,20 @@ public class UserController {
             return ResponseEntity.badRequest().body("phoneNumber is required");
         }
 
-        long id = sequence.getAndIncrement();
-        payload.setId(id);
-        users.put(id, payload);
+        User user = new User();
+        user.setFullName(payload.getFullName());
+        user.setEmail(payload.getEmail());
+        user.setPhoneNumber(payload.getPhoneNumber());
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(payload);
+        long id = sequence.getAndIncrement();
+        user.setId(id);
+        users.put(id, user);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(UserResponseDto.fromEntity(user));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody User payload) {
+    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody UserRequestDto payload) {
         User existing = users.get(id);
         if (existing == null) {
             return ResponseEntity.notFound().build();
@@ -76,7 +85,7 @@ public class UserController {
         }
 
         users.put(id, existing);
-        return ResponseEntity.ok(existing);
+        return ResponseEntity.ok(UserResponseDto.fromEntity(existing));
     }
 
     @DeleteMapping("/{id}")
