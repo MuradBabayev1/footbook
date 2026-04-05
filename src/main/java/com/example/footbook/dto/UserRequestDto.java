@@ -5,6 +5,7 @@ public class UserRequestDto {
     private String fullName;
     private String email;
     private String phoneNumber;
+    private String password;
 
     public UserRequestDto() {
     }
@@ -31,5 +32,13 @@ public class UserRequestDto {
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }

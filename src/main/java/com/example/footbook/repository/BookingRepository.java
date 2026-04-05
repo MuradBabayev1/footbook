@@ -1,7 +1,7 @@
 package com.example.footbook.repository;
 
 import com.example.footbook.entity.Booking;
-import com.example.footbook.entity.BookingStatus;
+import com.example.footbook.enums.BookingStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
