@@ -4,11 +4,13 @@ import com.example.footbook.dto.UserRequestDto;
 import com.example.footbook.entity.User;
 import com.example.footbook.repository.UserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional
 public class UserService {
 
     private final UserRepository userRepository;

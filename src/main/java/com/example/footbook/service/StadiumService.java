@@ -4,11 +4,13 @@ import com.example.footbook.dto.StadiumRequestDto;
 import com.example.footbook.entity.Stadium;
 import com.example.footbook.repository.StadiumRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional
 public class StadiumService {
 
     private final StadiumRepository stadiumRepository;

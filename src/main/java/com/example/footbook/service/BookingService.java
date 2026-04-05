@@ -2,9 +2,14 @@ package com.example.footbook.service;
 
 import com.example.footbook.dto.BookingRequestDto;
 import com.example.footbook.entity.Booking;
+import com.example.footbook.entity.Stadium;
+import com.example.footbook.entity.User;
 import com.example.footbook.enums.BookingStatus;
 import com.example.footbook.repository.BookingRepository;
+import com.example.footbook.repository.StadiumRepository;
+import com.example.footbook.repository.UserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -12,12 +17,17 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional
 public class BookingService {
 
     private final BookingRepository bookingRepository;
+    private final UserRepository userRepository;
+    private final StadiumRepository stadiumRepository;
 
-    public BookingService(BookingRepository bookingRepository) {
+    public BookingService(BookingRepository bookingRepository, UserRepository userRepository, StadiumRepository stadiumRepository) {
         this.bookingRepository = bookingRepository;
+        this.userRepository = userRepository;
+        this.stadiumRepository = stadiumRepository;
     }
 
     public List<Booking> getAllBookings() {
@@ -75,9 +85,16 @@ public class BookingService {
             throw new IllegalArgumentException("attendees must be greater than zero");
         }
 
+        // Fetch User and Stadium entities
+        User user = userRepository.findById(requestDto.getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + requestDto.getUserId()));
+        
+        Stadium stadium = stadiumRepository.findById(requestDto.getStadiumId())
+                .orElseThrow(() -> new IllegalArgumentException("Stadium not found with id: " + requestDto.getStadiumId()));
+
         Booking booking = new Booking();
-        booking.setUserId(requestDto.getUserId());
-        booking.setStadiumId(requestDto.getStadiumId());
+        booking.setUser(user);
+        booking.setStadium(stadium);
         booking.setMatchTitle(requestDto.getMatchTitle());
         booking.setBookingDate(requestDto.getBookingDate());
         booking.setStartTime(requestDto.getStartTime());

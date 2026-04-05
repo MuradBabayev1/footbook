@@ -5,9 +5,12 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 import java.time.LocalDate;
@@ -22,11 +25,13 @@ public class Booking {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private Long userId;
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(name = "fk_booking_user"))
+    private User user;
 
-    @Column(nullable = false)
-    private Long stadiumId;
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "stadium_id", nullable = false, foreignKey = @ForeignKey(name = "fk_booking_stadium"))
+    private Stadium stadium;
 
     @Column(nullable = false)
     private String matchTitle;
@@ -61,20 +66,28 @@ public class Booking {
         this.id = id;
     }
 
-    public Long getUserId() {
-        return userId;
+    public User getUser() {
+        return user;
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public Long getUserId() {
+        return user != null ? user.getId() : null;
+    }
+
+    public Stadium getStadium() {
+        return stadium;
+    }
+
+    public void setStadium(Stadium stadium) {
+        this.stadium = stadium;
     }
 
     public Long getStadiumId() {
-        return stadiumId;
-    }
-
-    public void setStadiumId(Long stadiumId) {
-        this.stadiumId = stadiumId;
+        return stadium != null ? stadium.getId() : null;
     }
 
     public String getMatchTitle() {

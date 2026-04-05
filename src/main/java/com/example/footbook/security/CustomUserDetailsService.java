@@ -27,7 +27,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         return new org.springframework.security.core.userdetails.User(
                 user.getEmail(),
                 "", // Password is handled separately in authentication
-                getAuthorities()
+                getAuthorities(user)
         );
     }
 
@@ -41,16 +41,20 @@ public class CustomUserDetailsService implements UserDetailsService {
         return new org.springframework.security.core.userdetails.User(
                 user.getEmail(),
                 "",
-                getAuthorities()
+                getAuthorities(user)
         );
     }
 
     /**
-     * Get user authorities/roles
+     * Get user authorities/roles based on user's role
      */
-    private Collection<? extends GrantedAuthority> getAuthorities() {
+    private Collection<? extends GrantedAuthority> getAuthorities(User user) {
         Collection<GrantedAuthority> authorities = new ArrayList<>();
-        authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+        if (user.getRole() != null) {
+            authorities.add(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
+        } else {
+            authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+        }
         return authorities;
     }
 }
