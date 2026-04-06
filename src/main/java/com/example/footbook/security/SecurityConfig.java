@@ -85,6 +85,7 @@ public class SecurityConfig {
             .sessionManagement(sessionManagement -> sessionManagement
                     .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authz -> authz
+                    .requestMatchers("/", "/index.html", "/frontend", "/frontend/", "/frontend/**", "/favicon.ico", "/error").permitAll()
                     .requestMatchers("/api/auth/**").permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/stadiums/**").permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/stadiums/**").hasRole("ADMIN")

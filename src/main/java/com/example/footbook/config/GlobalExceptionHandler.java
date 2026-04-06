@@ -1,7 +1,9 @@
 package com.example.footbook.config;
 
 import com.example.footbook.exception.*;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -63,9 +65,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     /**
      * Handle binding (method argument) validation errors
      */
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, Object>> handleMethodArgumentNotValid(
+        @Override
+        protected ResponseEntity<Object> handleMethodArgumentNotValid(
             MethodArgumentNotValidException ex,
+            HttpHeaders headers,
+            HttpStatusCode status,
             WebRequest request) {
         
         List<String> errors = new ArrayList<>();
