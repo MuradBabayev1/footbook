@@ -4,7 +4,7 @@ const API_BASE = "/api/auth";
 
 const existingToken = localStorage.getItem("footbook.token") || sessionStorage.getItem("footbook.token");
 if (existingToken) {
-    window.location.href = "index.html";
+    window.location.href = "user-dashboard.html";
 }
 
 form.addEventListener("submit", async (event) => {
@@ -64,7 +64,7 @@ form.addEventListener("submit", async (event) => {
         status.classList.add("ok");
 
         window.setTimeout(() => {
-            window.location.href = "index.html";
+            window.location.href = "user-dashboard.html";
         }, 400);
     } catch (error) {
         status.textContent = "Server unreachable. Please try again.";

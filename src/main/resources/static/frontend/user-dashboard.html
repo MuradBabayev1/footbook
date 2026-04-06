@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Footbook | User Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/user-dashboard.css">
+</head>
+<body>
+    <div class="shell">
+        <aside class="sidebar">
+            <div class="brand">
+                <span class="brand-mark"></span>
+                <div>
+                    <strong>Footbook</strong>
+                    <span>Player Dashboard</span>
+                </div>
+            </div>
+
+            <nav class="menu">
+                <a href="#overview" class="active">Overview</a>
+                <a href="#stadiums">Stadiums</a>
+                <a href="#booking">New Booking</a>
+                <a href="#my-bookings">My Bookings</a>
+                <a href="user-login.html" id="logoutLink">Logout</a>
+            </nav>
+
+            <div class="sidebar-card">
+                <p class="sidebar-label">Signed in as</p>
+                <div id="userName" class="sidebar-user">Guest</div>
+                <p id="userEmail" class="sidebar-email"></p>
+            </div>
+        </aside>
+
+        <main class="content">
+            <section class="hero" id="overview">
+                <div>
+                    <p class="eyebrow">Your bookings, simplified</p>
+                    <h1>Find a stadium, book a slot, and keep your matches organized.</h1>
+                    <p class="lead">Browse available venues, create a new booking, and track upcoming matches from one clean dashboard.</p>
+                </div>
+                <div class="hero-actions">
+                    <a class="btn primary" href="#booking">Create Booking</a>
+                    <a class="btn secondary" href="#stadiums">Browse Stadiums</a>
+                </div>
+            </section>
+
+            <section class="stats-grid">
+                <article class="stat-card">
+                    <span class="stat-label">Available Stadiums</span>
+                    <strong id="availableCount">0</strong>
+                </article>
+                <article class="stat-card">
+                    <span class="stat-label">My Bookings</span>
+                    <strong id="bookingCount">0</strong>
+                </article>
+                <article class="stat-card">
+                    <span class="stat-label">Upcoming Matches</span>
+                    <strong id="upcomingCount">0</strong>
+                </article>
+                <article class="stat-card">
+                    <span class="stat-label">Status</span>
+                    <strong id="dashboardStatus">Ready</strong>
+                </article>
+            </section>
+
+            <section class="panel" id="stadiums">
+                <div class="panel-head">
+                    <div>
+                        <h2>Available Stadiums</h2>
+                        <p>Current stadiums you can book right now.</p>
+                    </div>
+                    <div class="panel-actions">
+                        <input id="stadiumSearch" type="search" placeholder="Search by city or name">
+                        <button class="btn secondary" id="refreshStadiums" type="button">Refresh</button>
+                    </div>
+                </div>
+                <div id="stadiumGrid" class="stadium-grid">
+                    <div class="empty-state">Loading stadiums...</div>
+                </div>
+            </section>
+
+            <section class="two-col">
+                <section class="panel" id="booking">
+                    <div class="panel-head compact">
+                        <div>
+                            <h2>Create Booking</h2>
+                            <p>Reserve your slot in a few details.</p>
+                        </div>
+                    </div>
+
+                    <form id="bookingForm" class="booking-form" novalidate>
+                        <div class="field">
+                            <label for="stadiumId">Stadium</label>
+                            <select id="stadiumId" name="stadiumId" required></select>
+                        </div>
+                        <div class="field">
+                            <label for="matchTitle">Match Title</label>
+                            <input id="matchTitle" name="matchTitle" type="text" placeholder="Friday Friendly" required>
+                        </div>
+                        <div class="field">
+                            <label for="bookingDate">Booking Date</label>
+                            <input id="bookingDate" name="bookingDate" type="date" required>
+                        </div>
+                        <div class="field-row">
+                            <div class="field">
+                                <label for="startTime">Start Time</label>
+                                <input id="startTime" name="startTime" type="time" required>
+                            </div>
+                            <div class="field">
+                                <label for="endTime">End Time</label>
+                                <input id="endTime" name="endTime" type="time" required>
+                            </div>
+                        </div>
+                        <div class="field-row">
+                            <div class="field">
+                                <label for="attendees">Attendees</label>
+                                <input id="attendees" name="attendees" type="number" min="1" placeholder="10" required>
+                            </div>
+                            <div class="field">
+                                <label>Status</label>
+                                <div class="status-pill">Pending confirmation</div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn primary">Submit Booking</button>
+                        <div id="bookingStatus" class="message" aria-live="polite"></div>
+                    </form>
+                </section>
+
+                <section class="panel">
+                    <div class="panel-head compact">
+                        <div>
+                            <h2>Quick Tips</h2>
+                            <p>Use this flow to keep bookings clear.</p>
+                        </div>
+                    </div>
+                    <ul class="tips">
+                        <li>Pick an available stadium first so the form stays valid.</li>
+                        <li>Keep your booking times realistic and non-overlapping.</li>
+                        <li>Your booking starts as pending, then admins can confirm it.</li>
+                    </ul>
+                </section>
+            </section>
+
+            <section class="panel" id="my-bookings">
+                <div class="panel-head">
+                    <div>
+                        <h2>My Bookings</h2>
+                        <p>All bookings for your account.</p>
+                    </div>
+                    <button class="btn secondary" id="refreshBookings" type="button">Refresh</button>
+                </div>
+                <div class="table-wrap">
+                    <table aria-label="My bookings">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Stadium</th>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Attendees</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bookingTableBody">
+                            <tr>
+                                <td colspan="6" class="empty-state">Loading bookings...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="js/user-dashboard.js"></script>
+</body>
+</html>
