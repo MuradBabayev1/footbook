@@ -19,10 +19,29 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 
-        String jsonResponse = "{\"status\": 401, \"error\": \"Unauthorized\", " +
-                "\"message\": \"" + authException.getMessage() + "\", " +
-                "\"path\": \"" + request.getServletPath() + "\"}";
+        String jsonResponse = "{"
+                + "\"status\":401,"
+                + "\"error\":\"Unauthorized\","
+                + "\"message\":\"" + escapeJson(authException.getMessage()) + "\","
+                + "\"path\":\"" + escapeJson(request.getServletPath()) + "\""
+                + "}";
+
         response.getWriter().print(jsonResponse);
         response.getWriter().flush();
+    }
+
+    private String escapeJson(String value) {
+        if (value == null) {
+            return "";
+        }
+
+        return value
+                .replace("\\", "\\\\")
+                .replace("\"", "\\\"")
+                .replace("\b", "\\b")
+                .replace("\f", "\\f")
+                .replace("\n", "\\n")
+                .replace("\r", "\\r")
+                .replace("\t", "\\t");
     }
 }

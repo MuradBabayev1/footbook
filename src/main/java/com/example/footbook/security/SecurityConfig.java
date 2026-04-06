@@ -92,7 +92,7 @@ public class SecurityConfig {
                     .requestMatchers(HttpMethod.PUT, "/api/stadiums/**").hasRole("ADMIN")
                     .requestMatchers(HttpMethod.DELETE, "/api/stadiums/**").hasRole("ADMIN")
                     .requestMatchers("/api/bookings/**").authenticated()
-                    .requestMatchers("/api/users/**").authenticated()
+                        .requestMatchers("/api/users/**").hasRole("ADMIN")
                     .anyRequest().authenticated())
             .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 

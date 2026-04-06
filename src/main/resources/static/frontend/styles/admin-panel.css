@@ -129,6 +129,133 @@ h1 {
     padding: 14px;
 }
 
+.manager {
+    display: grid;
+    gap: 16px;
+}
+
+.manager-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.manager-head h2 {
+    margin: 0 0 6px;
+    font-size: 1.1rem;
+}
+
+.manager-head p {
+    margin: 0;
+}
+
+.stadium-form {
+    display: grid;
+    gap: 14px;
+    padding: 16px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: #f9fcff;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.field {
+    display: grid;
+    gap: 8px;
+}
+
+.field.wide {
+    grid-column: 1 / -1;
+}
+
+.field label {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #27445f;
+}
+
+.field input,
+.field select {
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 11px 12px;
+    font: inherit;
+    color: var(--ink);
+    background: #fff;
+}
+
+.field input:focus,
+.field select:focus {
+    border-color: var(--brand);
+    box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.12);
+    outline: none;
+}
+
+.form-actions {
+    margin-top: 0;
+}
+
+.status-message {
+    min-height: 22px;
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--muted);
+}
+
+.status-message.success {
+    color: var(--ok);
+}
+
+.status-message.error {
+    color: var(--danger);
+}
+
+.manager-table {
+    overflow-x: auto;
+}
+
+.manager-table table {
+    min-width: 760px;
+}
+
+.table-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.table-actions button {
+    border: 0;
+    border-radius: 8px;
+    padding: 7px 10px;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.table-actions .edit {
+    background: #e0f2fe;
+    color: #075985;
+}
+
+.table-actions .delete {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.empty-state {
+    text-align: center;
+    color: var(--muted);
+    padding: 18px 14px !important;
+}
+
 .card h2 {
     margin: 0;
     font-size: 1rem;
@@ -247,6 +374,14 @@ tbody tr:last-child td {
     .grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
+
+    .manager-head {
+        flex-direction: column;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 @media (max-width: 640px) {
@@ -261,6 +396,10 @@ tbody tr:last-child td {
 
     .grid {
         grid-template-columns: 1fr;
+    }
+
+    .manager-table table {
+        min-width: 680px;
     }
 
     th,

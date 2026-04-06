@@ -58,6 +58,74 @@
                 </article>
             </section>
 
+            <section class="manager card">
+                <div class="manager-head">
+                    <div>
+                        <h2>Stadium Manager</h2>
+                        <p class="muted">Add, edit, or remove stadiums from the live catalog.</p>
+                    </div>
+                    <div class="actions">
+                        <button class="btn" id="addStadiumBtn" type="button">Add Stadium</button>
+                        <button class="btn secondary" id="refreshStadiumBtn" type="button">Refresh</button>
+                    </div>
+                </div>
+
+                <form class="stadium-form" id="stadiumForm" hidden>
+                    <input type="hidden" id="stadiumId">
+                    <div class="form-grid">
+                        <div class="field">
+                            <label for="name">Stadium Name</label>
+                            <input id="name" name="name" type="text" placeholder="City Arena" required>
+                        </div>
+                        <div class="field">
+                            <label for="city">City</label>
+                            <input id="city" name="city" type="text" placeholder="Dhaka" required>
+                        </div>
+                        <div class="field wide">
+                            <label for="location">Location</label>
+                            <input id="location" name="location" type="text" placeholder="Road 12, Dhanmondi" required>
+                        </div>
+                        <div class="field">
+                            <label for="capacity">Capacity</label>
+                            <input id="capacity" name="capacity" type="number" min="1" placeholder="1200" required>
+                        </div>
+                        <div class="field">
+                            <label for="available">Availability</label>
+                            <select id="available" name="available">
+                                <option value="true">Available</option>
+                                <option value="false">Unavailable</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="actions form-actions">
+                        <button class="btn" type="submit" id="saveStadiumBtn">Save Stadium</button>
+                        <button class="btn secondary" type="button" id="cancelStadiumBtn">Cancel</button>
+                    </div>
+                    <div id="stadiumStatus" class="status-message" aria-live="polite"></div>
+                </form>
+
+                <div class="table-wrap manager-table">
+                    <table aria-label="Stadium catalog" id="stadiumTable">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>City</th>
+                                <th>Location</th>
+                                <th>Capacity</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stadiumTableBody">
+                            <tr>
+                                <td colspan="6" class="empty-state">Loading stadiums...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
             <section class="table-wrap">
                 <table aria-label="Recent bookings">
                     <thead>
@@ -96,7 +164,6 @@
             </section>
 
             <section class="actions">
-                <button class="btn" type="button">Add Stadium</button>
                 <button class="btn secondary" type="button">Export Report</button>
             </section>
         </main>
