@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Footbook | Admin Panel</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f3f7fb;
+            --surface: #ffffff;
+            --ink: #152238;
+            --muted: #586d85;
+            --line: #d6e0ea;
+            --brand: #0f766e;
+            --brand-dark: #115e59;
+            --warn: #b45309;
+            --ok: #166534;
+            --danger: #991b1b;
+            --sidebar: #0b2239;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at 88% 6%, rgba(15, 118, 110, 0.16) 0%, transparent 28%),
+                linear-gradient(180deg, #e7eef5, var(--bg));
+            color: var(--ink);
+            font-family: "Manrope", "Segoe UI", sans-serif;
+        }
+
+        .layout {
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: 260px 1fr;
+        }
+
+        .sidebar {
+            background: linear-gradient(180deg, #0d2c49, var(--sidebar));
+            color: #d6e8f8;
+            padding: 24px 18px;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            margin-bottom: 26px;
+        }
+
+        .brand-mark {
+            width: 11px;
+            height: 11px;
+            border-radius: 999px;
+            background: #14b8a6;
+            box-shadow: 0 0 0 5px rgba(20, 184, 166, 0.26);
+        }
+
+        .menu {
+            display: grid;
+            gap: 10px;
+        }
+
+        .menu a {
+            text-decoration: none;
+            color: #d6e8f8;
+            padding: 10px 12px;
+            border-radius: 10px;
+            font-weight: 700;
+            transition: background-color 0.2s ease;
+        }
+
+        .menu a.active,
+        .menu a:hover {
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .content {
+            padding: 24px;
+            display: grid;
+            gap: 18px;
+            align-content: start;
+        }
+
+        .top {
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            padding: 16px 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 10px 30px rgba(21, 34, 56, 0.08);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: clamp(1.3rem, 3vw, 2rem);
+            letter-spacing: -0.02em;
+        }
+
+        .muted {
+            color: var(--muted);
+        }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border-radius: 999px;
+            padding: 8px 12px;
+            background: #ebf8f6;
+            color: var(--brand-dark);
+            font-weight: 700;
+            font-size: 0.86rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 14px;
+        }
+
+        .card h2 {
+            margin: 0;
+            font-size: 1rem;
+        }
+
+        .value {
+            margin-top: 8px;
+            font-size: 1.65rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+        }
+
+        .sub {
+            margin-top: 3px;
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+
+        .up { color: var(--ok); }
+        .down { color: var(--danger); }
+        .warn { color: var(--warn); }
+
+        .table-wrap {
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #f5fafc;
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--line);
+            font-size: 0.94rem;
+        }
+
+        th {
+            font-size: 0.82rem;
+            letter-spacing: 0.07em;
+            text-transform: uppercase;
+            color: #385a75;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: 0;
+        }
+
+        .status {
+            display: inline-block;
+            border-radius: 999px;
+            padding: 4px 9px;
+            font-size: 0.78rem;
+            font-weight: 800;
+            letter-spacing: 0.02em;
+        }
+
+        .status.confirmed {
+            background: #ecfdf3;
+            color: #166534;
+        }
+
+        .status.pending {
+            background: #fff7ed;
+            color: #c2410c;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            border: 0;
+            border-radius: 10px;
+            padding: 10px 12px;
+            font: inherit;
+            font-weight: 700;
+            color: #fff;
+            cursor: pointer;
+            background: linear-gradient(140deg, var(--brand), var(--brand-dark));
+        }
+
+        .btn.secondary {
+            background: #e9f1f8;
+            color: #204765;
+        }
+
+        @media (max-width: 980px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                padding-bottom: 14px;
+            }
+
+            .grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 640px) {
+            .content {
+                padding: 16px;
+            }
+
+            .top {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            th,
+            td {
+                padding: 10px;
+                font-size: 0.88rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="brand"><span class="brand-mark"></span> FOOTBOOK ADMIN</div>
+            <nav class="menu">
+                <a href="#" class="active">Dashboard</a>
+                <a href="#">Stadiums</a>
+                <a href="#">Bookings</a>
+                <a href="#">Users</a>
+                <a href="#">Payments</a>
+                <a href="login.html">Logout</a>
+            </nav>
+        </aside>
+
+        <main class="content">
+            <section class="top">
+                <div>
+                    <h1>Operations Dashboard</h1>
+                    <div class="muted">Daily overview for venues, bookings, and payments.</div>
+                </div>
+                <div class="pill">Live mode: Active</div>
+            </section>
+
+            <section class="grid">
+                <article class="card">
+                    <h2>Total Bookings</h2>
+                    <div class="value">142</div>
+                    <div class="sub up">+18% vs last week</div>
+                </article>
+
+                <article class="card">
+                    <h2>Pending Approvals</h2>
+                    <div class="value">11</div>
+                    <div class="sub warn">Needs review today</div>
+                </article>
+
+                <article class="card">
+                    <h2>Revenue</h2>
+                    <div class="value">$12,480</div>
+                    <div class="sub up">+9% this month</div>
+                </article>
+
+                <article class="card">
+                    <h2>Cancelled</h2>
+                    <div class="value">6</div>
+                    <div class="sub down">-2% from yesterday</div>
+                </article>
+            </section>
+
+            <section class="table-wrap">
+                <table aria-label="Recent bookings">
+                    <thead>
+                        <tr>
+                            <th>Booking ID</th>
+                            <th>User</th>
+                            <th>Stadium</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>#BK-4021</td>
+                            <td>Amir Khan</td>
+                            <td>City Arena A</td>
+                            <td>2026-04-08</td>
+                            <td><span class="status confirmed">Confirmed</span></td>
+                        </tr>
+                        <tr>
+                            <td>#BK-4022</td>
+                            <td>Leah Smith</td>
+                            <td>North Field 2</td>
+                            <td>2026-04-08</td>
+                            <td><span class="status pending">Pending</span></td>
+                        </tr>
+                        <tr>
+                            <td>#BK-4023</td>
+                            <td>Rafiul Hasan</td>
+                            <td>East Dome</td>
+                            <td>2026-04-09</td>
+                            <td><span class="status confirmed">Confirmed</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section class="actions">
+                <button class="btn" type="button">Add Stadium</button>
+                <button class="btn secondary" type="button">Export Report</button>
+            </section>
+        </main>
+    </div>
+</body>
+</html>
