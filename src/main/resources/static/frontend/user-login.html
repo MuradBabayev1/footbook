@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Footbook | User Login</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/user-login.css">
+</head>
+<body>
+    <main class="page">
+        <section class="hero">
+            <div class="badge">Footbook For Players</div>
+            <h1>Sign in and book your next match in minutes.</h1>
+            <p>Find available stadium slots, manage your bookings, and keep your game schedule organized.</p>
+            <ul>
+                <li>Browse available stadiums</li>
+                <li>Track upcoming bookings</li>
+                <li>Cancel or reschedule quickly</li>
+            </ul>
+        </section>
+
+        <section class="panel">
+            <h2>User Login</h2>
+            <p class="subtitle">Use your registered email and password.</p>
+
+            <form id="userLoginForm" novalidate>
+                <div class="field">
+                    <label for="email">Email</label>
+                    <input id="email" name="email" type="email" placeholder="player@footbook.com" required>
+                </div>
+
+                <div class="field">
+                    <label for="password">Password</label>
+                    <input id="password" name="password" type="password" placeholder="Enter your password" required minlength="6">
+                </div>
+
+                <div class="row">
+                    <label class="checkbox"><input type="checkbox" name="remember"> Keep me signed in</label>
+                    <a href="#" class="link">Forgot password?</a>
+                </div>
+
+                <button type="submit" class="btn">Login</button>
+                <div id="status" class="status" aria-live="polite"></div>
+            </form>
+
+            <p class="meta-links">
+                Are you admin? <a href="login.html">Use admin login</a>
+            </p>
+        </section>
+    </main>
+
+    <script src="js/user-login.js"></script>
+</body>
+</html>
