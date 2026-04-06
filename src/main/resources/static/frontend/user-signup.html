@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Footbook | User Sign Up</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/user-signup.css">
+</head>
+<body>
+    <main class="page">
+        <section class="hero">
+            <div class="badge">Join Footbook</div>
+            <h1>Create your player account and start booking instantly.</h1>
+            <p>Build your account once and use it to reserve stadium slots, manage your schedule, and track your games.</p>
+            <ul>
+                <li>Fast account creation</li>
+                <li>Secure login session</li>
+                <li>Simple booking management</li>
+            </ul>
+        </section>
+
+        <section class="panel">
+            <h2>User Sign Up</h2>
+            <p class="subtitle">Fill in your details to create an account.</p>
+
+            <form id="userSignupForm" novalidate>
+                <div class="field">
+                    <label for="fullName">Full Name</label>
+                    <input id="fullName" name="fullName" type="text" placeholder="Your full name" required>
+                </div>
+
+                <div class="field">
+                    <label for="email">Email</label>
+                    <input id="email" name="email" type="email" placeholder="player@footbook.com" required>
+                </div>
+
+                <div class="field">
+                    <label for="phoneNumber">Phone Number</label>
+                    <input id="phoneNumber" name="phoneNumber" type="tel" placeholder="01700123456" required>
+                </div>
+
+                <div class="field">
+                    <label for="password">Password</label>
+                    <input id="password" name="password" type="password" placeholder="At least 6 characters" minlength="6" required>
+                </div>
+
+                <div class="field">
+                    <label for="confirmPassword">Confirm Password</label>
+                    <input id="confirmPassword" name="confirmPassword" type="password" placeholder="Re-enter password" minlength="6" required>
+                </div>
+
+                <button type="submit" class="btn">Create Account</button>
+                <div id="status" class="status" aria-live="polite"></div>
+            </form>
+
+            <p class="meta-links">
+                Already have an account? <a href="user-login.html">Login</a>
+            </p>
+        </section>
+    </main>
+
+    <script src="js/user-signup.js"></script>
+</body>
+</html>
