@@ -76,6 +76,10 @@ function setBookingMessage(message, type = "") {
     }
 }
 
+function getCurrentUserId() {
+    return currentUser?.userId ?? currentUser?.id ?? null;
+}
+
 function formatTimeRange(startTime, endTime) {
     if (!startTime && !endTime) {
         return "-";
@@ -134,7 +138,9 @@ function renderBookings(items) {
             <td>
                 <div class="row-actions">
                     <span class="chip ${booking.status === "CONFIRMED" ? "available" : "unavailable"}">${escapeHtml(booking.status || "-")}</span>
-                    <button type="button" class="cancel" data-cancel-booking="${booking.id}">Cancel</button>
+                    ${booking.status === "CANCELLED"
+                        ? ""
+                        : `<button type="button" class="cancel" data-cancel-booking="${booking.id}">Cancel</button>`}
                 </div>
             </td>
         </tr>
@@ -180,13 +186,14 @@ function applySearchFilter(items) {
 }
 
 async function loadBookings() {
-    if (!currentUser?.userId) {
+    const userId = getCurrentUserId();
+    if (!userId) {
         bookingTableBody.innerHTML = '<tr><td colspan="6" class="empty-state">Login again to load your bookings.</td></tr>';
         return;
     }
 
     try {
-        const response = await fetch(`${API_BASE}/bookings?userId=${currentUser.userId}`, {
+        const response = await fetch(`${API_BASE}/bookings?userId=${userId}`, {
             headers: authHeaders(false)
         });
 
@@ -206,13 +213,14 @@ async function loadBookings() {
 async function createBooking(event) {
     event.preventDefault();
 
-    if (!currentUser?.userId) {
+    const userId = getCurrentUserId();
+    if (!userId) {
         setBookingMessage("You need to sign in again.", "error");
         return;
     }
 
     const payload = {
-        userId: currentUser.userId,
+        userId,
         stadiumId: Number(stadiumSelect.value),
         matchTitle: stadiumFormFields.matchTitle.value.trim(),
         bookingDate: stadiumFormFields.bookingDate.value,
@@ -224,6 +232,25 @@ async function createBooking(event) {
 
     if (!payload.stadiumId || !payload.matchTitle || !payload.bookingDate || !payload.startTime || !payload.endTime || !payload.attendees) {
         setBookingMessage("Please complete all booking fields.", "error");
+        return;
+    }
+
+    const bookingDate = new Date(`${payload.bookingDate}T00:00:00`);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (bookingDate < today) {
+        setBookingMessage("Booking date cannot be in the past.", "error");
+        return;
+    }
+
+    if (payload.endTime <= payload.startTime) {
+        setBookingMessage("End time must be after start time.", "error");
+        return;
+    }
+
+    if (!Number.isInteger(payload.attendees) || payload.attendees <= 0) {
+        setBookingMessage("Attendees must be a positive whole number.", "error");
         return;
     }
 
@@ -262,9 +289,10 @@ async function cancelBooking(bookingId) {
     }
 
     try {
-        const response = await fetch(`${API_BASE}/bookings/${bookingId}`, {
-            method: "DELETE",
-            headers: authHeaders(false)
+        const response = await fetch(`${API_BASE}/bookings/${bookingId}/status`, {
+            method: "PATCH",
+            headers: authHeaders(),
+            body: JSON.stringify({ status: "CANCELLED" })
         });
 
         if (response.status === 401 || response.status === 403) {
@@ -282,6 +310,25 @@ async function cancelBooking(bookingId) {
     } catch (error) {
         setBookingMessage("Unable to cancel booking.", "error");
     }
+}
+
+function setDateConstraints() {
+    const dateInput = stadiumFormFields.bookingDate;
+    if (!dateInput) {
+        return;
+    }
+
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const day = String(today.getDate()).padStart(2, "0");
+    dateInput.min = `${year}-${month}-${day}`;
+}
+
+async function initializeDashboard() {
+    setDateConstraints();
+    await loadStadiums();
+    await loadBookings();
 }
 
 stadiumSearch.addEventListener("input", () => {
@@ -317,5 +364,4 @@ bookingTableBody.addEventListener("click", (event) => {
     cancelBooking(button.dataset.cancelBooking);
 });
 
-loadStadiums();
-loadBookings();
+initializeDashboard();
