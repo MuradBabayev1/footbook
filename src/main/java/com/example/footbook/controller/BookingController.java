@@ -5,9 +5,12 @@ import com.example.footbook.dto.BookingResponseDto;
 import com.example.footbook.dto.BookingStatusUpdateRequestDto;
 import com.example.footbook.entity.Booking;
 import com.example.footbook.enums.BookingStatus;
+import com.example.footbook.repository.UserRepository;
 import com.example.footbook.service.BookingService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -17,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -25,28 +29,44 @@ import java.util.List;
 public class BookingController {
 
     private final BookingService bookingService;
+    private final UserRepository userRepository;
 
-    public BookingController(BookingService bookingService) {
+    public BookingController(BookingService bookingService, UserRepository userRepository) {
         this.bookingService = bookingService;
+        this.userRepository = userRepository;
     }
 
     @GetMapping
     public List<BookingResponseDto> getAllBookings(@RequestParam(required = false) Long userId,
                                                    @RequestParam(required = false) Long stadiumId) {
         List<Booking> bookings;
-        
-        if (userId != null && stadiumId != null) {
-            bookings = bookingService.getAllBookings().stream()
-                    .filter(b -> b.getUserId().equals(userId) && b.getStadiumId().equals(stadiumId))
-                    .toList();
-        } else if (userId != null) {
-            bookings = bookingService.getBookingsByUserId(userId);
-        } else if (stadiumId != null) {
-            bookings = bookingService.getBookingsByStadiumId(stadiumId);
+
+        if (isAdmin()) {
+            if (userId != null && stadiumId != null) {
+                bookings = bookingService.getAllBookings().stream()
+                        .filter(b -> b.getUserId().equals(userId) && b.getStadiumId().equals(stadiumId))
+                        .toList();
+            } else if (userId != null) {
+                bookings = bookingService.getBookingsByUserId(userId);
+            } else if (stadiumId != null) {
+                bookings = bookingService.getBookingsByStadiumId(stadiumId);
+            } else {
+                bookings = bookingService.getAllBookings();
+            }
         } else {
-            bookings = bookingService.getAllBookings();
+            Long currentUserId = getCurrentUserId();
+            if (userId != null && !userId.equals(currentUserId)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot view other users' bookings");
+            }
+
+            bookings = bookingService.getBookingsByUserId(currentUserId);
+            if (stadiumId != null) {
+                bookings = bookings.stream()
+                        .filter(b -> b.getStadiumId().equals(stadiumId))
+                        .toList();
+            }
         }
-        
+
         return bookings.stream()
                 .map(BookingResponseDto::fromEntity)
                 .toList();
@@ -55,13 +75,26 @@ public class BookingController {
     @GetMapping("/{id}")
     public ResponseEntity<BookingResponseDto> getBookingById(@PathVariable Long id) {
         return bookingService.getBookingById(id)
-                .map(booking -> ResponseEntity.ok(BookingResponseDto.fromEntity(booking)))
+                .map(booking -> {
+                    if (!isAdmin() && !booking.getUserId().equals(getCurrentUserId())) {
+                        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot view other users' bookings");
+                    }
+                    return ResponseEntity.ok(BookingResponseDto.fromEntity(booking));
+                })
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
     public ResponseEntity<?> createBooking(@RequestBody BookingRequestDto payload) {
         try {
+            if (!isAdmin()) {
+                Long currentUserId = getCurrentUserId();
+                if (payload.getUserId() != null && !payload.getUserId().equals(currentUserId)) {
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot create booking for another user");
+                }
+                payload.setUserId(currentUserId);
+            }
+
             Booking booking = bookingService.createBooking(payload);
             return ResponseEntity.status(HttpStatus.CREATED).body(BookingResponseDto.fromEntity(booking));
         } catch (IllegalArgumentException e) {
@@ -75,17 +108,56 @@ public class BookingController {
         if (payload.getStatus() == null) {
             return ResponseEntity.badRequest().body("status is required");
         }
-        
-        return bookingService.updateBookingStatus(id, payload.getStatus())
-                .map(booking -> ResponseEntity.ok(BookingResponseDto.fromEntity(booking)))
+
+        return bookingService.getBookingById(id)
+                .map(existing -> {
+                    if (!isAdmin()) {
+                        if (!existing.getUserId().equals(getCurrentUserId())) {
+                            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot update other users' bookings");
+                        }
+                        if (payload.getStatus() != BookingStatus.CANCELLED) {
+                            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only cancellation is allowed");
+                        }
+                    }
+
+                    return bookingService.updateBookingStatus(id, payload.getStatus())
+                            .map(booking -> ResponseEntity.ok(BookingResponseDto.fromEntity(booking)))
+                            .orElse(ResponseEntity.notFound().build());
+                })
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteBooking(@PathVariable Long id) {
+        if (!isAdmin()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only admins can delete bookings");
+        }
+
         if (bookingService.deleteBooking(id)) {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();
+    }
+
+    private boolean isAdmin() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null) {
+            return false;
+        }
+
+        return authentication.getAuthorities().stream()
+                .anyMatch(authority -> "ROLE_ADMIN".equals(authority.getAuthority()));
+    }
+
+    private Long getCurrentUserId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || authentication.getName() == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication required");
+        }
+
+        String email = authentication.getName();
+        return userRepository.findByEmail(email)
+                .map(user -> user.getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authenticated user not found"));
     }
 }

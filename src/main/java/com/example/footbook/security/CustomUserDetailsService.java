@@ -26,7 +26,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         return new org.springframework.security.core.userdetails.User(
                 user.getEmail(),
-                "", // Password is handled separately in authentication
+            user.getPassword(),
                 getAuthorities(user)
         );
     }
@@ -40,7 +40,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         return new org.springframework.security.core.userdetails.User(
                 user.getEmail(),
-                "",
+            user.getPassword(),
                 getAuthorities(user)
         );
     }

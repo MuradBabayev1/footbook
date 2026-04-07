@@ -2,6 +2,7 @@ package com.example.footbook.security;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -12,11 +13,22 @@ import java.util.Date;
 @Component
 public class JwtTokenProvider {
 
-    @Value("${jwt.secret:your-secret-key-should-be-at-least-32-characters-long-for-security}")
+    @Value("${jwt.secret}")
     private String jwtSecret;
 
     @Value("${jwt.expiration:86400000}")
     private long jwtExpiration;
+
+    @PostConstruct
+    public void validateConfiguration() {
+        if (jwtSecret == null || jwtSecret.isBlank()) {
+            throw new IllegalStateException("JWT secret must be provided via jwt.secret/JWT_SECRET");
+        }
+
+        if (jwtSecret.length() < 32) {
+            throw new IllegalStateException("JWT secret must be at least 32 characters long");
+        }
+    }
 
     /**
      * Generate JWT token for a user

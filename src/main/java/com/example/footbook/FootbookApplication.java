@@ -20,22 +20,31 @@ public class FootbookApplication {
 	@Bean
 	CommandLineRunner bootstrapAdmin(UserRepository userRepository,
 	                                PasswordEncoder passwordEncoder,
-	                                @Value("${footbook.bootstrap.admin.enabled:true}") boolean enabled,
+	                                @Value("${footbook.bootstrap.admin.enabled:false}") boolean enabled,
 	                                @Value("${footbook.bootstrap.admin.full-name:Footbook Admin}") String fullName,
-	                                @Value("${footbook.bootstrap.admin.email:muradb836@gmail.com}") String email,
+	                                @Value("${footbook.bootstrap.admin.email:admin@footbook.com}") String email,
 	                                @Value("${footbook.bootstrap.admin.phone:+10000000000}") String phone,
-	                                @Value("${footbook.bootstrap.admin.password:murad1310}") String password) {
+	                                @Value("${footbook.bootstrap.admin.password:admin123456}") String password,
+	                                @Value("${footbook.bootstrap.admin.reset-password:true}") boolean resetPassword) {
 		return args -> {
-			if (!enabled || userRepository.existsByEmail(email)) {
+			if (!enabled) {
 				return;
 			}
 
-			User admin = new User();
+			if (password == null || password.isBlank() || password.length() < 10) {
+				throw new IllegalStateException("Set a strong footbook.bootstrap.admin.password (min 10 chars) when bootstrap admin is enabled");
+			}
+
+			User admin = userRepository.findByEmail(email).orElseGet(User::new);
 			admin.setFullName(fullName);
 			admin.setEmail(email);
 			admin.setPhoneNumber(phone);
-			admin.setPassword(passwordEncoder.encode(password));
 			admin.setRole(UserRole.ADMIN);
+
+			if (admin.getId() == null || resetPassword) {
+				admin.setPassword(passwordEncoder.encode(password));
+			}
+
 			userRepository.save(admin);
 		};
 	}
