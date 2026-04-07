@@ -45,6 +45,7 @@ public class AuthenticationController {
                         // Generate JWT token
                         String token = jwtTokenProvider.generateToken(user.getId(), user.getEmail());
                         LoginResponse response = new LoginResponse(token, user.getId(), user.getEmail(), user.getFullName());
+                        response.setRole(user.getRole() != null ? user.getRole().name() : "USER");
                         return ResponseEntity.ok(response);
                     } else {
                         Map<String, String> error = new HashMap<>();
@@ -82,6 +83,7 @@ public class AuthenticationController {
         // Generate JWT token
         String token = jwtTokenProvider.generateToken(savedUser.getId(), savedUser.getEmail());
         LoginResponse response = new LoginResponse(token, savedUser.getId(), savedUser.getEmail(), savedUser.getFullName());
+        response.setRole(savedUser.getRole() != null ? savedUser.getRole().name() : "USER");
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }

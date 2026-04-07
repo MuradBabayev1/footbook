@@ -27,11 +27,26 @@ if (!token) {
 if (rawUser && sessionInfo) {
     try {
         const user = JSON.parse(rawUser);
+        const role = String(user.role || "").toUpperCase();
+        if (role !== "ADMIN") {
+            localStorage.removeItem("footbook.token");
+            localStorage.removeItem("footbook.user");
+            sessionStorage.removeItem("footbook.token");
+            sessionStorage.removeItem("footbook.user");
+            window.location.href = "login.html";
+        }
         const name = user.fullName || user.email || "Admin";
         sessionInfo.textContent = `Signed in: ${name}`;
     } catch (error) {
         sessionInfo.textContent = "Live mode: Active";
+        localStorage.removeItem("footbook.token");
+        localStorage.removeItem("footbook.user");
+        sessionStorage.removeItem("footbook.token");
+        sessionStorage.removeItem("footbook.user");
+        window.location.href = "login.html";
     }
+} else {
+    window.location.href = "login.html";
 }
 
 if (logoutLink) {

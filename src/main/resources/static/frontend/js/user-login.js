@@ -48,6 +48,7 @@ form.addEventListener("submit", async (event) => {
 
         const storage = remember ? localStorage : sessionStorage;
         const fallbackStorage = remember ? sessionStorage : localStorage;
+        const role = String(data.role || "USER").toUpperCase();
 
         fallbackStorage.removeItem("footbook.token");
         fallbackStorage.removeItem("footbook.user");
@@ -57,7 +58,8 @@ form.addEventListener("submit", async (event) => {
             userId: data.userId,
             email: data.email,
             fullName: data.fullName,
-            type: data.type || "Bearer"
+            type: data.type || "Bearer",
+            role
         }));
 
         status.textContent = "Login successful. Redirecting...";
