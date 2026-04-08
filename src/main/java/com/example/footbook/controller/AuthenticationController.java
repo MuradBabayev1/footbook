@@ -6,13 +6,16 @@ import com.example.footbook.security.JwtTokenProvider;
 import com.example.footbook.security.LoginRequest;
 import com.example.footbook.security.LoginResponse;
 import com.example.footbook.security.RegisterRequest;
+import com.example.footbook.service.EmailVerificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
@@ -32,6 +35,9 @@ public class AuthenticationController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private EmailVerificationService emailVerificationService;
+
     /**
      * Login endpoint
      */
@@ -42,6 +48,12 @@ public class AuthenticationController {
                 .map(user -> {
                     // Validate password
                     if (passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
+                        if (!Boolean.TRUE.equals(user.getEmailVerified())) {
+                            Map<String, String> error = new HashMap<>();
+                            error.put("error", "Please verify your email before logging in");
+                            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
+                        }
+
                         // Generate JWT token
                         String token = jwtTokenProvider.generateToken(user.getId(), user.getEmail());
                         LoginResponse response = new LoginResponse(token, user.getId(), user.getEmail(), user.getFullName());
@@ -77,15 +89,34 @@ public class AuthenticationController {
         user.setEmail(registerRequest.getEmail());
         user.setPhoneNumber(registerRequest.getPhoneNumber());
         user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
+        user.setEmailVerified(false);
 
         User savedUser = userRepository.save(user);
+        String verificationToken = emailVerificationService.issueVerificationToken(savedUser);
+        emailVerificationService.sendVerificationEmail(savedUser, verificationToken);
 
-        // Generate JWT token
-        String token = jwtTokenProvider.generateToken(savedUser.getId(), savedUser.getEmail());
-        LoginResponse response = new LoginResponse(token, savedUser.getId(), savedUser.getEmail(), savedUser.getFullName());
-        response.setRole(savedUser.getRole() != null ? savedUser.getRole().name() : "USER");
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Account created. Please verify your email before logging in.");
+        // Exposed for local/dev environments where SMTP may not be configured.
+        response.put("verificationLink", emailVerificationService.buildVerificationLink(verificationToken));
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @GetMapping("/verify-email")
+    public ResponseEntity<?> verifyEmail(@RequestParam String token) {
+        return emailVerificationService.verifyToken(token)
+                .map(user -> {
+                    Map<String, Object> response = new HashMap<>();
+                    response.put("message", "Email verified successfully. You can now log in.");
+                    response.put("email", user.getEmail());
+                    return ResponseEntity.ok(response);
+                })
+                .orElseGet(() -> {
+                    Map<String, Object> response = new HashMap<>();
+                    response.put("error", "Invalid or expired verification link");
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+                });
     }
 
     /**

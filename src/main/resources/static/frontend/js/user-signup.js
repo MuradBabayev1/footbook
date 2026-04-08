@@ -65,12 +65,14 @@ form.addEventListener("submit", async (event) => {
             return;
         }
 
-        status.textContent = "Account created successfully. Redirecting to login...";
+        const message = data.message || "Account created. Please verify your email before logging in.";
+        const verificationHint = data.verificationLink ? ` Open this link to verify: ${data.verificationLink}` : "";
+        status.textContent = `${message}${verificationHint}`;
         status.classList.add("ok");
 
         window.setTimeout(() => {
             window.location.href = "user-login.html";
-        }, 700);
+        }, 1400);
     } catch (error) {
         status.textContent = "Unable to reach server. Please try again.";
         status.classList.add("error");
