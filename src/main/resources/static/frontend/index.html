@@ -3,107 +3,79 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Footbook</title>
+	<title>Footbook | Book Your Match</title>
 	<link rel="stylesheet" href="styles/index.css">
 </head>
 <body>
-	<div class="page">
-		<div class="container">
-			<header>
-				<div class="brand"><span class="brand-mark"></span> Footbook</div>
-				<h1>Book stadiums with a simple, clear interface.</h1>
-				<p class="lead">
-					This is a lightweight frontend starter for the Footbook project.
-					It gives you a clean homepage now and leaves room for future pages like
-					authentication, stadium listings, and booking management.
-				</p>
-			</header>
+	<div class="ambient ambient-left" aria-hidden="true"></div>
+	<div class="ambient ambient-right" aria-hidden="true"></div>
 
-			<main>
-				<section class="card">
-					<h2>For Players</h2>
-					<ul>
-						<li>Browse available stadiums and their details instantly.</li>
-						<li>Book your next match in seconds with real-time availability.</li>
-						<li>Manage, reschedule, or cancel bookings anytime from your account.</li>
-					</ul>
-				</section>
+	<div class="page-shell">
+		<header class="site-header">
+			<div class="brand"><span class="brand-mark"></span>FOOTBOOK</div>
+			<nav class="top-nav" aria-label="Primary">
+				<a href="user-login.html">Player Login</a>
+				<a href="login.html">Admin Login</a>
+			</nav>
+		</header>
 
-				<section class="card">
-					<h2>For Admins</h2>
-					<p>
-						Manage stadium inventory, track all bookings, process payments,
-						view detailed analytics, and optimize your venue usage and revenue
-						with an intuitive admin dashboard.
-					</p>
-				</section>
-
-				<section class="card full">
-					<h2>Get Started Now</h2>
-					<p>
-						Join the Footbook community and start booking your favorite stadiums 
-						today. Whether you're a player looking for your next match or an admin 
-						managing venues, sign up or log in in seconds.
-					</p>
-
+		<main>
+			<section class="hero">
+				<div class="hero-copy">
+					<p class="eyebrow">Weekend leagues. Midweek rivalries. Zero friction.</p>
+					<h1>Find your field.<br>Lock your slot.<br>Play on time.</h1>
+					<p class="lead">Footbook keeps stadium booking smooth for players and simple for venue managers. No phone calls, no guesswork, no overbooking.</p>
 					<div class="actions">
-						<a class="button primary" href="user-signup.html">Sign Up</a>
-						<a class="button secondary" href="user-login.html">Already have an account? Sign In</a>
-						<a class="button primary" href="admin-panel.html">Admin Panel</a>
-					</div>
-
-					<div class="meta">
-						<div class="stat">
-							<strong>Fast</strong>
-							Book a stadium in 30 seconds.
-						</div>
-						<div class="stat">
-							<strong>Secure</strong>
-							JWT authentication & encrypted.
-						</div>
-						<div class="stat">
-							<strong>Reliable</strong>
-							Real-time updates always.
-						</div>
-					</div>
-				</section>
-			</main>
-
-			<footer>
-				<div class="footer-content">
-					<div class="footer-section">
-						<h4>Players</h4>
-						<ul>
-							<li><a href="user-signup.html">Create Account</a></li>
-							<li><a href="user-login.html">Sign In</a></li>
-							<li><a href="#">Browse Stadiums</a></li>
-							<li><a href="#">My Bookings</a></li>
-						</ul>
-					</div>
-					<div class="footer-section">
-						<h4>For Admins</h4>
-						<ul>
-							<li><a href="login.html">Admin Login</a></li>
-							<li><a href="admin-panel.html">Dashboard</a></li>
-							<li><a href="#">Manage Venues</a></li>
-							<li><a href="#">Reports</a></li>
-						</ul>
-					</div>
-					<div class="footer-section">
-						<h4>Resources</h4>
-						<ul>
-							<li><a href="#">About</a></li>
-							<li><a href="#">Features</a></li>
-							<li><a href="#">Contact</a></li>
-							<li><a href="#">Privacy</a></li>
-						</ul>
+						<a id="primary-cta" class="button primary" href="user-signup.html">Start Booking</a>
+						<a id="secondary-cta" class="button ghost" href="user-login.html">I Already Have An Account</a>
+						<a class="button secondary" href="admin-panel.html">Open Admin Panel</a>
 					</div>
 				</div>
-				<div class="footer-bottom">
-					<p>&copy; 2026 Footbook. All rights reserved.</p>
+				<div class="hero-panel" aria-label="Platform highlights">
+					<div class="kpi">
+						<span class="kpi-label">Booking Time</span>
+						<strong>30 sec</strong>
+					</div>
+					<div class="kpi">
+						<span class="kpi-label">Schedule Sync</span>
+						<strong>Real-time</strong>
+					</div>
+					<div class="kpi">
+						<span class="kpi-label">Access</span>
+						<strong>JWT secured</strong>
+					</div>
 				</div>
-			</footer>
-		</div>
+			</section>
+
+			<section class="feature-grid" aria-label="Key capabilities">
+				<article class="feature-card">
+					<h2>Built for Players</h2>
+					<p>Check availability instantly, reserve your favorite slot, and manage your match plans in one clear dashboard.</p>
+				</article>
+				<article class="feature-card">
+					<h2>Built for Venues</h2>
+					<p>Control inventory, monitor bookings, and optimize usage with one admin workspace designed for operational speed.</p>
+				</article>
+				<article class="feature-card wide">
+					<h2>How It Works</h2>
+					<ol>
+						<li>Create your account in under a minute.</li>
+						<li>Select a stadium and preferred time slot.</li>
+						<li>Confirm your booking and track it in your dashboard.</li>
+					</ol>
+				</article>
+			</section>
+		</main>
+
+		<footer class="site-footer">
+			<div class="footer-links">
+				<a href="user-signup.html">Create Player Account</a>
+				<a href="user-login.html">Player Sign In</a>
+				<a href="login.html">Admin Sign In</a>
+				<a href="admin-panel.html">Admin Dashboard</a>
+			</div>
+			<p>&copy; 2026 Footbook. Plan less, play more.</p>
+		</footer>
 	</div>
 	<script src="js/index.js"></script>
 </body>
