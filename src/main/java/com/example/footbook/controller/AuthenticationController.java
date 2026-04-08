@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import jakarta.validation.Valid;
 import java.util.HashMap;
@@ -98,24 +99,90 @@ public class AuthenticationController {
         Map<String, Object> response = new HashMap<>();
         response.put("message", "Account created. Please verify your email before logging in.");
         // Exposed for local/dev environments where SMTP may not be configured.
+        response.put("verificationCode", verificationToken);
         response.put("verificationLink", emailVerificationService.buildVerificationLink(verificationToken));
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping("/verify-email")
-    public ResponseEntity<?> verifyEmail(@RequestParam String token) {
-        return emailVerificationService.verifyToken(token)
+    public ResponseEntity<?> verifyEmail(@RequestParam(required = false) String token,
+                                         @RequestParam(required = false) String code,
+                                         @RequestParam(required = false) String email,
+                                         @org.springframework.web.bind.annotation.RequestHeader(value = "Accept", required = false) String accept) {
+        boolean wantsJson = accept != null && accept.contains("application/json");
+
+        String verificationValue = token != null && !token.isBlank() ? token : code;
+
+        return emailVerificationService.verifyToken(verificationValue)
                 .map(user -> {
+                    if (!wantsJson) {
+                        String redirectUrl = ServletUriComponentsBuilder
+                                .fromCurrentContextPath()
+                                .path("/frontend/user-login.html")
+                                .queryParam("verified", "success")
+                                .queryParam("email", user.getEmail())
+                                .build()
+                                .toUriString();
+                        return ResponseEntity.status(HttpStatus.FOUND)
+                                .header("Location", redirectUrl)
+                                .build();
+                    }
+
                     Map<String, Object> response = new HashMap<>();
                     response.put("message", "Email verified successfully. You can now log in.");
                     response.put("email", user.getEmail());
                     return ResponseEntity.ok(response);
                 })
                 .orElseGet(() -> {
+                    if (!wantsJson) {
+                        String redirectUrl = ServletUriComponentsBuilder
+                                .fromCurrentContextPath()
+                                .path("/frontend/user-login.html")
+                                .queryParam("verified", "invalid")
+                                .build()
+                                .toUriString();
+                        return ResponseEntity.status(HttpStatus.FOUND)
+                                .header("Location", redirectUrl)
+                                .build();
+                    }
+
                     Map<String, Object> response = new HashMap<>();
                     response.put("error", "Invalid or expired verification link");
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+                });
+    }
+
+    @PostMapping("/resend-verification")
+    public ResponseEntity<?> resendVerification(@RequestBody Map<String, String> payload) {
+        String email = payload.get("email");
+        if (email == null || email.isBlank()) {
+            Map<String, String> response = new HashMap<>();
+            response.put("error", "Email is required");
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        return userRepository.findByEmail(email)
+                .map(user -> {
+                    if (Boolean.TRUE.equals(user.getEmailVerified())) {
+                        Map<String, String> response = new HashMap<>();
+                        response.put("message", "Email is already verified");
+                        return ResponseEntity.ok(response);
+                    }
+
+                    String verificationToken = emailVerificationService.issueVerificationToken(user);
+                    emailVerificationService.sendVerificationEmail(user, verificationToken);
+
+                    Map<String, Object> response = new HashMap<>();
+                    response.put("message", "Verification code resent successfully");
+                    response.put("verificationCode", verificationToken);
+                    response.put("verificationLink", emailVerificationService.buildVerificationLink(verificationToken));
+                    return ResponseEntity.ok(response);
+                })
+                .orElseGet(() -> {
+                    Map<String, String> response = new HashMap<>();
+                    response.put("error", "User not found");
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
                 });
     }
 

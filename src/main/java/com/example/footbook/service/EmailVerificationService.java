@@ -16,6 +16,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 @Transactional
@@ -42,10 +43,10 @@ public class EmailVerificationService {
     }
 
     public String issueVerificationToken(User user) {
-        String token = UUID.randomUUID().toString();
+        String token = String.format("%06d", ThreadLocalRandom.current().nextInt(100000, 1000000));
         user.setEmailVerified(false);
         user.setEmailVerificationToken(token);
-        user.setEmailVerificationTokenExpiry(LocalDateTime.now().plusHours(24));
+        user.setEmailVerificationTokenExpiry(LocalDateTime.now().plusMinutes(30));
         userRepository.save(user);
         return token;
     }
@@ -68,7 +69,7 @@ public class EmailVerificationService {
 
     public String buildVerificationLink(String token) {
         String encoded = URLEncoder.encode(token, StandardCharsets.UTF_8);
-        return frontendBaseUrl + "/user-login.html?verifyToken=" + encoded;
+        return frontendBaseUrl + "/verify-email.html?code=" + encoded;
     }
 
     public void sendVerificationEmail(User user, String token) {
@@ -84,10 +85,13 @@ public class EmailVerificationService {
             SimpleMailMessage message = new SimpleMailMessage();
             message.setFrom(mailFrom);
             message.setTo(user.getEmail());
-            message.setSubject("Verify your Footbook account");
-            message.setText("Welcome to Footbook!\n\nPlease verify your email by opening this link:\n"
+            message.setSubject("Your Footbook verification code");
+            message.setText("Welcome to Footbook!\n\nYour verification code is: "
+                    + token
+                    + "\n\nEnter this 6-digit code on the verification page to activate your account.\n"
+                    + "You can also open this link: "
                     + verificationLink
-                    + "\n\nThis link expires in 24 hours.");
+                    + "\n\nThis code expires in 30 minutes.");
             mailSender.send(message);
         } catch (Exception ex) {
             log.warn("Failed to send verification email to {}. Verification link: {}", user.getEmail(), verificationLink, ex);

@@ -7,9 +7,29 @@ if (existingToken) {
     window.location.href = "user-dashboard.html";
 }
 
+function showVerificationResultFromQuery() {
+    const params = new URLSearchParams(window.location.search);
+    const verified = params.get("verified");
+
+    if (!verified) {
+        return false;
+    }
+
+    status.className = "status";
+    if (verified === "success") {
+        status.textContent = "Email verified. You can now log in.";
+        status.classList.add("ok");
+    } else {
+        status.textContent = "Invalid or expired verification link.";
+        status.classList.add("error");
+    }
+
+    return true;
+}
+
 async function processVerificationToken() {
     const params = new URLSearchParams(window.location.search);
-    const verifyToken = params.get("verifyToken");
+    const verifyToken = params.get("verifyToken") || params.get("code");
     if (!verifyToken) {
         return;
     }
@@ -17,7 +37,11 @@ async function processVerificationToken() {
     try {
         status.className = "status";
         status.textContent = "Verifying your email...";
-        const response = await fetch(`${API_BASE}/verify-email?token=${encodeURIComponent(verifyToken)}`);
+            const response = await fetch(`${API_BASE}/verify-email?code=${encodeURIComponent(verifyToken)}`, {
+                headers: {
+                    "Accept": "application/json"
+                }
+            });
         const data = await response.json().catch(() => ({}));
 
         if (!response.ok) {
@@ -33,6 +57,7 @@ async function processVerificationToken() {
     }
 }
 
+showVerificationResultFromQuery();
 processVerificationToken();
 
 form.addEventListener("submit", async (event) => {
