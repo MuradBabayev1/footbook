@@ -7,59 +7,6 @@ if (existingToken) {
     window.location.href = "user-dashboard.html";
 }
 
-function showVerificationResultFromQuery() {
-    const params = new URLSearchParams(window.location.search);
-    const verified = params.get("verified");
-
-    if (!verified) {
-        return false;
-    }
-
-    status.className = "status";
-    if (verified === "success") {
-        status.textContent = "Email verified. You can now log in.";
-        status.classList.add("ok");
-    } else {
-        status.textContent = "Invalid or expired verification link.";
-        status.classList.add("error");
-    }
-
-    return true;
-}
-
-async function processVerificationToken() {
-    const params = new URLSearchParams(window.location.search);
-    const verifyToken = params.get("verifyToken") || params.get("code");
-    if (!verifyToken) {
-        return;
-    }
-
-    try {
-        status.className = "status";
-        status.textContent = "Verifying your email...";
-            const response = await fetch(`${API_BASE}/verify-email?code=${encodeURIComponent(verifyToken)}`, {
-                headers: {
-                    "Accept": "application/json"
-                }
-            });
-        const data = await response.json().catch(() => ({}));
-
-        if (!response.ok) {
-            status.textContent = data.error || "Verification failed. The link may be expired.";
-            status.classList.add("error");
-        } else {
-            status.textContent = data.message || "Email verified. You can now log in.";
-            status.classList.add("ok");
-        }
-    } catch (error) {
-        status.textContent = "Unable to verify email right now. Please try again.";
-        status.classList.add("error");
-    }
-}
-
-showVerificationResultFromQuery();
-processVerificationToken();
-
 form.addEventListener("submit", async (event) => {
     event.preventDefault();
     status.className = "status";

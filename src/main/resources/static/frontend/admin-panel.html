@@ -35,26 +35,26 @@
             <section class="grid">
                 <article class="card">
                     <h2>Total Bookings</h2>
-                    <div class="value">142</div>
-                    <div class="sub up">+18% vs last week</div>
+                    <div class="value" id="totalBookingsCount">0</div>
+                    <div class="sub up">All recorded bookings</div>
                 </article>
 
                 <article class="card">
                     <h2>Pending Approvals</h2>
-                    <div class="value">11</div>
-                    <div class="sub warn">Needs review today</div>
+                    <div class="value" id="pendingBookingsCount">0</div>
+                    <div class="sub warn">Bookings waiting review</div>
                 </article>
 
                 <article class="card">
-                    <h2>Revenue</h2>
-                    <div class="value">$12,480</div>
-                    <div class="sub up">+9% this month</div>
+                    <h2>Total Users</h2>
+                    <div class="value" id="totalUsersCount">0</div>
+                    <div class="sub up">Registered accounts</div>
                 </article>
 
                 <article class="card">
                     <h2>Cancelled</h2>
-                    <div class="value">6</div>
-                    <div class="sub down">-2% from yesterday</div>
+                    <div class="value" id="cancelledBookingsCount">0</div>
+                    <div class="sub down">Cancelled bookings</div>
                 </article>
             </section>
 
@@ -145,11 +145,12 @@
                                 <th>Full Name</th>
                                 <th>Email</th>
                                 <th>Phone Number</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody id="usersTableBody">
                             <tr>
-                                <td colspan="4" class="empty-state">Loading users...</td>
+                                <td colspan="5" class="empty-state">Loading users...</td>
                             </tr>
                         </tbody>
                     </table>

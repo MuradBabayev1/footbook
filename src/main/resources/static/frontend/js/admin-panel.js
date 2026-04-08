@@ -12,6 +12,10 @@ const stadiumIdInput = document.getElementById("stadiumId");
 const saveStadiumBtn = document.getElementById("saveStadiumBtn");
 const refreshUsersBtn = document.getElementById("refreshUsersBtn");
 const usersTableBody = document.getElementById("usersTableBody");
+const totalBookingsCount = document.getElementById("totalBookingsCount");
+const pendingBookingsCount = document.getElementById("pendingBookingsCount");
+const totalUsersCount = document.getElementById("totalUsersCount");
+const cancelledBookingsCount = document.getElementById("cancelledBookingsCount");
 const stadiumFormFields = {
     name: document.getElementById("name"),
     city: document.getElementById("city"),
@@ -22,6 +26,7 @@ const stadiumFormFields = {
 
 const API_BASE = "/api/stadiums";
 const USERS_API_BASE = "/api/users";
+const BOOKINGS_API_BASE = "/api/bookings";
 
 if (!token) {
     window.location.href = "login.html";
@@ -160,7 +165,7 @@ function renderUsersEmptyState(message) {
         return;
     }
 
-    usersTableBody.innerHTML = `<tr><td colspan="4" class="empty-state">${message}</td></tr>`;
+    usersTableBody.innerHTML = `<tr><td colspan="5" class="empty-state">${message}</td></tr>`;
 }
 
 function renderUsers(users) {
@@ -179,8 +184,48 @@ function renderUsers(users) {
             <td>${escapeHtml(user.fullName || "-")}</td>
             <td>${escapeHtml(user.email || "-")}</td>
             <td>${escapeHtml(user.phoneNumber || "-")}</td>
+            <td>
+                <div class="table-actions">
+                    <button type="button" class="delete" data-user-action="delete" data-user-id="${user.id}">Delete</button>
+                </div>
+            </td>
         </tr>
     `).join("");
+}
+
+function setDashboardStat(element, value) {
+    if (element) {
+        element.textContent = String(value);
+    }
+}
+
+async function deleteUser(userId) {
+    const confirmed = window.confirm("Delete this user? This cannot be undone.");
+    if (!confirmed) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`${USERS_API_BASE}/${userId}`, {
+            method: "DELETE",
+            headers: authHeaders(false)
+        });
+
+        if (response.status === 401 || response.status === 403) {
+            window.location.href = "login.html";
+            return;
+        }
+
+        if (!response.ok) {
+            setStadiumStatus("Unable to delete user.", "error");
+            return;
+        }
+
+        setStadiumStatus("User deleted successfully.", "success");
+        await loadUsers();
+    } catch (error) {
+        setStadiumStatus("Unable to delete user right now.", "error");
+    }
 }
 
 async function loadStadiums() {
@@ -234,6 +279,44 @@ async function loadUsers() {
         renderUsers(Array.isArray(users) ? users : []);
     } catch (error) {
         renderUsersEmptyState("Unable to reach the server.");
+    }
+}
+
+async function loadDashboardStats() {
+    try {
+        const [bookingsResponse, usersResponse, stadiumsResponse] = await Promise.all([
+            fetch(BOOKINGS_API_BASE, { headers: authHeaders(false) }),
+            fetch(USERS_API_BASE, { headers: authHeaders(false) }),
+            fetch(API_BASE, { headers: authHeaders(false) })
+        ]);
+
+        if ([bookingsResponse, usersResponse, stadiumsResponse].some((response) => response.status === 401 || response.status === 403)) {
+            window.location.href = "login.html";
+            return;
+        }
+
+        const bookings = bookingsResponse.ok ? await bookingsResponse.json().catch(() => []) : [];
+        const users = usersResponse.ok ? await usersResponse.json().catch(() => []) : [];
+        const stadiums = stadiumsResponse.ok ? await stadiumsResponse.json().catch(() => []) : [];
+
+        const safeBookings = Array.isArray(bookings) ? bookings : [];
+        const safeUsers = Array.isArray(users) ? users : [];
+        const safeStadiums = Array.isArray(stadiums) ? stadiums : [];
+
+        setDashboardStat(totalBookingsCount, safeBookings.length);
+        setDashboardStat(pendingBookingsCount, safeBookings.filter((booking) => String(booking.status || "").toUpperCase() === "PENDING").length);
+        setDashboardStat(totalUsersCount, safeUsers.length);
+        setDashboardStat(cancelledBookingsCount, safeBookings.filter((booking) => String(booking.status || "").toUpperCase() === "CANCELLED").length);
+
+        const statusPill = document.getElementById("sessionInfo");
+        if (statusPill) {
+            statusPill.textContent = `${safeStadiums.length} stadiums live`;
+        }
+    } catch (error) {
+        setDashboardStat(totalBookingsCount, 0);
+        setDashboardStat(pendingBookingsCount, 0);
+        setDashboardStat(totalUsersCount, 0);
+        setDashboardStat(cancelledBookingsCount, 0);
     }
 }
 
@@ -317,6 +400,14 @@ async function deleteStadium(stadiumId) {
 async function handleTableClick(event) {
     const button = event.target.closest("button[data-action]");
     if (!button) {
+        const userButton = event.target.closest("button[data-user-action]");
+        if (!userButton) {
+            return;
+        }
+
+        if (userButton.dataset.userAction === "delete") {
+            await deleteUser(userButton.dataset.userId);
+        }
         return;
     }
 
@@ -380,5 +471,10 @@ if (stadiumTableBody) {
     stadiumTableBody.addEventListener("click", handleTableClick);
 }
 
+if (usersTableBody) {
+    usersTableBody.addEventListener("click", handleTableClick);
+}
+
 loadStadiums();
 loadUsers();
+loadDashboardStats();
