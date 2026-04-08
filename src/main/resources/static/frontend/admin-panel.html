@@ -15,9 +15,9 @@
             <div class="brand"><span class="brand-mark"></span> FOOTBOOK ADMIN</div>
             <nav class="menu">
                 <a href="#" class="active">Dashboard</a>
-                <a href="#">Stadiums</a>
-                <a href="#">Bookings</a>
-                <a href="#">Users</a>
+                <a href="#stadium-manager">Stadiums</a>
+                <a href="#recent-bookings">Bookings</a>
+                <a href="#users-manager">Users</a>
                 <a href="#">Payments</a>
                 <a href="login.html">Logout</a>
             </nav>
@@ -58,7 +58,7 @@
                 </article>
             </section>
 
-            <section class="manager card">
+            <section class="manager card" id="stadium-manager">
                 <div class="manager-head">
                     <div>
                         <h2>Stadium Manager</h2>
@@ -126,7 +126,37 @@
                 </div>
             </section>
 
-            <section class="table-wrap">
+            <section class="manager card" id="users-manager">
+                <div class="manager-head">
+                    <div>
+                        <h2>Users</h2>
+                        <p class="muted">Registered players and admins in the system.</p>
+                    </div>
+                    <div class="actions">
+                        <button class="btn secondary" id="refreshUsersBtn" type="button">Refresh Users</button>
+                    </div>
+                </div>
+
+                <div class="table-wrap manager-table">
+                    <table aria-label="Users table" id="usersTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Full Name</th>
+                                <th>Email</th>
+                                <th>Phone Number</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody">
+                            <tr>
+                                <td colspan="4" class="empty-state">Loading users...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="table-wrap" id="recent-bookings">
                 <table aria-label="Recent bookings">
                     <thead>
                         <tr>
@@ -168,6 +198,6 @@
             </section>
         </main>
     </div>
-    <script src="js/admin-panel.js"></script>
+    <script src="js/admin-panel.js?v=20260409-1"></script>
 </body>
 </html>

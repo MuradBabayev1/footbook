@@ -10,6 +10,8 @@ const stadiumStatus = document.getElementById("stadiumStatus");
 const stadiumTableBody = document.getElementById("stadiumTableBody");
 const stadiumIdInput = document.getElementById("stadiumId");
 const saveStadiumBtn = document.getElementById("saveStadiumBtn");
+const refreshUsersBtn = document.getElementById("refreshUsersBtn");
+const usersTableBody = document.getElementById("usersTableBody");
 const stadiumFormFields = {
     name: document.getElementById("name"),
     city: document.getElementById("city"),
@@ -19,6 +21,7 @@ const stadiumFormFields = {
 };
 
 const API_BASE = "/api/stadiums";
+const USERS_API_BASE = "/api/users";
 
 if (!token) {
     window.location.href = "login.html";
@@ -152,6 +155,34 @@ function renderStadiums(stadiums) {
     `).join("");
 }
 
+function renderUsersEmptyState(message) {
+    if (!usersTableBody) {
+        return;
+    }
+
+    usersTableBody.innerHTML = `<tr><td colspan="4" class="empty-state">${message}</td></tr>`;
+}
+
+function renderUsers(users) {
+    if (!usersTableBody) {
+        return;
+    }
+
+    if (!users.length) {
+        renderUsersEmptyState("No users found.");
+        return;
+    }
+
+    usersTableBody.innerHTML = users.map((user) => `
+        <tr>
+            <td>${escapeHtml(user.id ?? "-")}</td>
+            <td>${escapeHtml(user.fullName || "-")}</td>
+            <td>${escapeHtml(user.email || "-")}</td>
+            <td>${escapeHtml(user.phoneNumber || "-")}</td>
+        </tr>
+    `).join("");
+}
+
 async function loadStadiums() {
     renderEmptyState("Loading stadiums...");
 
@@ -174,6 +205,35 @@ async function loadStadiums() {
         renderStadiums(Array.isArray(stadiums) ? stadiums : []);
     } catch (error) {
         renderEmptyState("Unable to reach the server.");
+    }
+}
+
+async function loadUsers() {
+    if (!usersTableBody) {
+        return;
+    }
+
+    renderUsersEmptyState("Loading users...");
+
+    try {
+        const response = await fetch(USERS_API_BASE, {
+            headers: authHeaders(false)
+        });
+
+        if (response.status === 401 || response.status === 403) {
+            window.location.href = "login.html";
+            return;
+        }
+
+        if (!response.ok) {
+            renderUsersEmptyState("Failed to load users.");
+            return;
+        }
+
+        const users = await response.json().catch(() => []);
+        renderUsers(Array.isArray(users) ? users : []);
+    } catch (error) {
+        renderUsersEmptyState("Unable to reach the server.");
     }
 }
 
@@ -304,6 +364,10 @@ if (refreshStadiumBtn) {
     refreshStadiumBtn.addEventListener("click", loadStadiums);
 }
 
+if (refreshUsersBtn) {
+    refreshUsersBtn.addEventListener("click", loadUsers);
+}
+
 if (cancelStadiumBtn) {
     cancelStadiumBtn.addEventListener("click", closeStadiumForm);
 }
@@ -317,3 +381,4 @@ if (stadiumTableBody) {
 }
 
 loadStadiums();
+loadUsers();
