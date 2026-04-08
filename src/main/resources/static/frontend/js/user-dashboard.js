@@ -186,14 +186,8 @@ function applySearchFilter(items) {
 }
 
 async function loadBookings() {
-    const userId = getCurrentUserId();
-    if (!userId) {
-        bookingTableBody.innerHTML = '<tr><td colspan="6" class="empty-state">Login again to load your bookings.</td></tr>';
-        return;
-    }
-
     try {
-        const response = await fetch(`${API_BASE}/bookings?userId=${userId}`, {
+        const response = await fetch(`${API_BASE}/bookings`, {
             headers: authHeaders(false)
         });
 
@@ -202,25 +196,26 @@ async function loadBookings() {
             return;
         }
 
+        if (!response.ok) {
+            bookingTableBody.innerHTML = '<tr><td colspan="6" class="empty-state">Unable to load bookings right now.</td></tr>';
+            setBookingMessage(`Unable to load bookings (${response.status}).`, "error");
+            return;
+        }
+
         const data = await response.json().catch(() => []);
         bookings = Array.isArray(data) ? data : [];
         renderBookings(bookings);
+        setBookingMessage("", "");
     } catch (error) {
         bookingTableBody.innerHTML = '<tr><td colspan="6" class="empty-state">Unable to load bookings.</td></tr>';
+        setBookingMessage("Unable to load bookings. Please refresh.", "error");
     }
 }
 
 async function createBooking(event) {
     event.preventDefault();
 
-    const userId = getCurrentUserId();
-    if (!userId) {
-        setBookingMessage("You need to sign in again.", "error");
-        return;
-    }
-
     const payload = {
-        userId,
         stadiumId: Number(stadiumSelect.value),
         matchTitle: stadiumFormFields.matchTitle.value.trim(),
         bookingDate: stadiumFormFields.bookingDate.value,
@@ -229,6 +224,11 @@ async function createBooking(event) {
         attendees: Number(stadiumFormFields.attendees.value),
         status: "PENDING"
     };
+
+    const userId = getCurrentUserId();
+    if (userId) {
+        payload.userId = userId;
+    }
 
     if (!payload.stadiumId || !payload.matchTitle || !payload.bookingDate || !payload.startTime || !payload.endTime || !payload.attendees) {
         setBookingMessage("Please complete all booking fields.", "error");
@@ -276,6 +276,13 @@ async function createBooking(event) {
 
         bookingForm.reset();
         setBookingMessage("Booking created successfully.", "success");
+
+        if (data && typeof data === "object" && data.id) {
+            // Show the new booking immediately even if a later refresh call fails.
+            bookings = [data, ...bookings.filter((booking) => String(booking.id) !== String(data.id))];
+            renderBookings(bookings);
+        }
+
         await loadBookings();
     } catch (error) {
         setBookingMessage("Unable to create booking.", "error");

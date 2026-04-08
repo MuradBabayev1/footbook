@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/bookings")
@@ -39,35 +40,24 @@ public class BookingController {
     @GetMapping
     public List<BookingResponseDto> getAllBookings(@RequestParam(required = false) Long userId,
                                                    @RequestParam(required = false) Long stadiumId) {
-        List<Booking> bookings;
+        List<Booking> allBookings = bookingService.getAllBookings();
 
         if (isAdmin()) {
-            if (userId != null && stadiumId != null) {
-                bookings = bookingService.getAllBookings().stream()
-                        .filter(b -> b.getUserId().equals(userId) && b.getStadiumId().equals(stadiumId))
-                        .toList();
-            } else if (userId != null) {
-                bookings = bookingService.getBookingsByUserId(userId);
-            } else if (stadiumId != null) {
-                bookings = bookingService.getBookingsByStadiumId(stadiumId);
-            } else {
-                bookings = bookingService.getAllBookings();
-            }
-        } else {
-            Long currentUserId = getCurrentUserId();
-            if (userId != null && !userId.equals(currentUserId)) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot view other users' bookings");
-            }
-
-            bookings = bookingService.getBookingsByUserId(currentUserId);
-            if (stadiumId != null) {
-                bookings = bookings.stream()
-                        .filter(b -> b.getStadiumId().equals(stadiumId))
-                        .toList();
-            }
+            return allBookings.stream()
+                    .filter(booking -> userId == null || Objects.equals(booking.getUserId(), userId))
+                    .filter(booking -> stadiumId == null || Objects.equals(booking.getStadiumId(), stadiumId))
+                    .map(BookingResponseDto::fromEntity)
+                    .toList();
         }
 
-        return bookings.stream()
+        Long currentUserId = getCurrentUserId();
+        if (userId != null && !userId.equals(currentUserId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot view other users' bookings");
+        }
+
+        return allBookings.stream()
+                .filter(booking -> Objects.equals(booking.getUserId(), currentUserId))
+                .filter(booking -> stadiumId == null || Objects.equals(booking.getStadiumId(), stadiumId))
                 .map(BookingResponseDto::fromEntity)
                 .toList();
     }
