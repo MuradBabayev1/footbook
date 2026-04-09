@@ -6,25 +6,38 @@
     <title>Footbook | User Sign Up</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Sora:wght@500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles/user-signup.css">
 </head>
 <body>
-    <main class="page">
-        <section class="hero">
-            <div class="badge">Join Footbook</div>
-            <h1>Create your player account and start booking instantly.</h1>
-            <p>Build your account once and use it to reserve stadium slots, manage your schedule, and track your games.</p>
-            <ul>
-                <li>Fast account creation</li>
-                <li>Secure login session</li>
-                <li>Simple booking management</li>
-            </ul>
+    <main class="auth-layout">
+        <section class="story-pane">
+            <p class="eyebrow">Create Your Footbook ID</p>
+            <h1>Build your player profile in under a minute.</h1>
+            <p class="lead">Set up once, then book stadiums, organize match plans, and keep your game life in sync from any device.</p>
+
+            <div class="feature-grid">
+                <article>
+                    <h3>Smart Scheduling</h3>
+                    <p>Reserve slots by date and time without calling anyone.</p>
+                </article>
+                <article>
+                    <h3>Secure Access</h3>
+                    <p>Your account keeps booking history and profile details protected.</p>
+                </article>
+                <article>
+                    <h3>Quick Updates</h3>
+                    <p>View and manage every booking from your dashboard instantly.</p>
+                </article>
+            </div>
         </section>
 
-        <section class="panel">
-            <h2>User Sign Up</h2>
-            <p class="subtitle">Fill in your details to create an account.</p>
+        <section class="form-pane" aria-label="User signup form">
+            <div class="form-head">
+                <span class="tag">New account</span>
+                <h2>User Sign Up</h2>
+                <p>Fill in your details to create your Footbook player account.</p>
+            </div>
 
             <form id="userSignupForm" novalidate>
                 <div class="field">
@@ -32,24 +45,27 @@
                     <input id="fullName" name="fullName" type="text" placeholder="Your full name" required>
                 </div>
 
-                <div class="field">
-                    <label for="email">Email</label>
-                    <input id="email" name="email" type="email" placeholder="player@footbook.com" required>
+                <div class="field-row">
+                    <div class="field">
+                        <label for="email">Email</label>
+                        <input id="email" name="email" type="email" placeholder="player@footbook.com" required>
+                    </div>
+                    <div class="field">
+                        <label for="phoneNumber">Phone Number</label>
+                        <input id="phoneNumber" name="phoneNumber" type="tel" placeholder="01700123456" required>
+                    </div>
                 </div>
 
-                <div class="field">
-                    <label for="phoneNumber">Phone Number</label>
-                    <input id="phoneNumber" name="phoneNumber" type="tel" placeholder="01700123456" required>
-                </div>
+                <div class="field-row">
+                    <div class="field">
+                        <label for="password">Password</label>
+                        <input id="password" name="password" type="password" placeholder="At least 6 characters" minlength="6" required>
+                    </div>
 
-                <div class="field">
-                    <label for="password">Password</label>
-                    <input id="password" name="password" type="password" placeholder="At least 6 characters" minlength="6" required>
-                </div>
-
-                <div class="field">
-                    <label for="confirmPassword">Confirm Password</label>
-                    <input id="confirmPassword" name="confirmPassword" type="password" placeholder="Re-enter password" minlength="6" required>
+                    <div class="field">
+                        <label for="confirmPassword">Confirm Password</label>
+                        <input id="confirmPassword" name="confirmPassword" type="password" placeholder="Re-enter password" minlength="6" required>
+                    </div>
                 </div>
 
                 <button type="submit" class="btn">Create Account</button>

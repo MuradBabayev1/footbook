@@ -6,25 +6,38 @@
     <title>Footbook | User Login</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Sora:wght@500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles/user-login.css">
 </head>
 <body>
-    <main class="page">
-        <section class="hero">
-            <div class="badge">Footbook For Players</div>
-            <h1>Sign in and book your next match in minutes.</h1>
-            <p>Find available stadium slots, manage your bookings, and keep your game schedule organized.</p>
-            <ul>
-                <li>Browse available stadiums</li>
-                <li>Track upcoming bookings</li>
-                <li>Cancel or reschedule quickly</li>
-            </ul>
+    <main class="auth-layout">
+        <section class="story-pane">
+            <p class="eyebrow">Footbook Player Access</p>
+            <h1>Welcome back to match mode.</h1>
+            <p class="lead">Jump straight into stadium discovery, secure your preferred slot, and keep every booking in one sharp dashboard.</p>
+
+            <div class="story-cards">
+                <article>
+                    <h3>Instant Availability</h3>
+                    <p>Scan open stadiums and reserve before slots disappear.</p>
+                </article>
+                <article>
+                    <h3>Fast Booking Flow</h3>
+                    <p>Create and track matches in a clean, focused workflow.</p>
+                </article>
+                <article>
+                    <h3>One Account</h3>
+                    <p>Sign in once, then manage your full playing schedule.</p>
+                </article>
+            </div>
         </section>
 
-        <section class="panel">
-            <h2>User Login</h2>
-            <p class="subtitle">Use your registered email and password.</p>
+        <section class="form-pane" aria-label="User login form">
+            <div class="form-head">
+                <span class="tag">Sign in</span>
+                <h2>User Login</h2>
+                <p>Use your registered email and password to continue.</p>
+            </div>
 
             <form id="userLoginForm" novalidate>
                 <div class="field">
@@ -47,8 +60,9 @@
             </form>
 
             <p class="meta-links">
-                New user? <a href="user-signup.html">Create account</a><br>
-                Are you admin? <a href="login.html">Use admin login</a>
+                New user? <a href="user-signup.html">Create account</a>
+                <span class="divider">|</span>
+                Are you admin? <a href="login.html">Admin login</a>
             </p>
         </section>
     </main>
