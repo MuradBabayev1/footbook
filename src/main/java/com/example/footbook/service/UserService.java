@@ -2,6 +2,7 @@ package com.example.footbook.service;
 
 import com.example.footbook.dto.UserRequestDto;
 import com.example.footbook.entity.User;
+import com.example.footbook.repository.BookingRepository;
 import com.example.footbook.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,9 +15,11 @@ import java.util.Optional;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final BookingRepository bookingRepository;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, BookingRepository bookingRepository) {
         this.userRepository = userRepository;
+        this.bookingRepository = bookingRepository;
     }
 
     public List<User> getAllUsers() {
@@ -74,6 +77,8 @@ public class UserService {
 
     public boolean deleteUser(Long id) {
         if (userRepository.existsById(id)) {
+            // Remove dependent bookings first to satisfy FK constraints.
+            bookingRepository.deleteByUserId(id);
             userRepository.deleteById(id);
             return true;
         }
