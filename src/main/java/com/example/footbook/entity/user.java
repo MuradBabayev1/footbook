@@ -30,6 +30,9 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    @Column(name = "email_verified", nullable = false)
+    private Boolean emailVerified = false;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private UserRole role = UserRole.USER;
@@ -75,6 +78,14 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public Boolean getEmailVerified() {
+        return emailVerified;
+    }
+
+    public void setEmailVerified(Boolean emailVerified) {
+        this.emailVerified = emailVerified;
     }
 
     public UserRole getRole() {

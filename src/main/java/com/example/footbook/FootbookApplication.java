@@ -8,6 +8,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @SpringBootApplication
@@ -15,6 +16,29 @@ public class FootbookApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(FootbookApplication.class, args);
+	}
+
+	@Bean
+	CommandLineRunner ensureOwnerRoleSupported(JdbcTemplate jdbcTemplate) {
+		return args -> {
+			try {
+				String columnType = jdbcTemplate.queryForObject(
+						"SELECT COLUMN_TYPE FROM INFORMATION_SCHEMA.COLUMNS " +
+						"WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'users' AND COLUMN_NAME = 'role'",
+						String.class
+				);
+
+				if (columnType != null
+						&& columnType.toLowerCase().startsWith("enum(")
+						&& !columnType.toUpperCase().contains("'OWNER'")) {
+					jdbcTemplate.execute(
+							"ALTER TABLE users MODIFY COLUMN role ENUM('ADMIN','OWNER','USER','STADIUM_MANAGER') NOT NULL"
+					);
+				}
+			} catch (Exception ignored) {
+				// Keep startup resilient if schema inspection/alter is not supported by DB settings.
+			}
+		};
 	}
 
 	@Bean
@@ -40,6 +64,7 @@ public class FootbookApplication {
 			admin.setEmail(email);
 			admin.setPhoneNumber(phone);
 			admin.setRole(UserRole.ADMIN);
+			admin.setEmailVerified(true);
 
 			if (admin.getId() == null || resetPassword) {
 				admin.setPassword(passwordEncoder.encode(password));

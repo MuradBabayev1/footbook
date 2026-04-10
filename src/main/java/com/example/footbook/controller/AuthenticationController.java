@@ -83,9 +83,13 @@ public class AuthenticationController {
         user.setEmail(registerRequest.getEmail());
         user.setPhoneNumber(registerRequest.getPhoneNumber());
         user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
-        String accountType = registerRequest.getAccountType() != null
-                ? registerRequest.getAccountType().trim().toUpperCase()
-                : "USER";
+        if (registerRequest.getAccountType() == null || registerRequest.getAccountType().isBlank()) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "Account type is required. Please choose User or Owner.");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        }
+
+        String accountType = registerRequest.getAccountType().trim().toUpperCase();
         if (!"USER".equals(accountType) && !"OWNER".equals(accountType)) {
             Map<String, String> error = new HashMap<>();
             error.put("error", "Invalid account type");
