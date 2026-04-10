@@ -1,6 +1,7 @@
 package com.example.footbook.service;
 
 import com.example.footbook.dto.StadiumRequestDto;
+import com.example.footbook.entity.Owner;
 import com.example.footbook.entity.Stadium;
 import com.example.footbook.repository.StadiumRepository;
 import org.springframework.stereotype.Service;
@@ -43,7 +44,10 @@ public class StadiumService {
         return stadiumRepository.findByCityAndAvailable(city, true);
     }
 
-    public Stadium createStadium(StadiumRequestDto requestDto) {
+    public Stadium createStadium(StadiumRequestDto requestDto, Owner owner) {
+        if (owner == null) {
+            throw new IllegalArgumentException("owner is required to create a stadium");
+        }
         if (requestDto.getName() == null || requestDto.getName().isBlank()) {
             throw new IllegalArgumentException("name is required");
         }
@@ -63,6 +67,7 @@ public class StadiumService {
         stadium.setLocation(requestDto.getLocation());
         stadium.setCapacity(requestDto.getCapacity());
         stadium.setAvailable(requestDto.getAvailable() != null ? requestDto.getAvailable() : true);
+        stadium.setOwner(owner);
 
         return stadiumRepository.save(stadium);
     }

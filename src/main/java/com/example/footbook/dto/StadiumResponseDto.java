@@ -10,6 +10,7 @@ public class StadiumResponseDto {
     private String location;
     private Integer capacity;
     private Boolean available;
+    private Long ownerId;
 
     public StadiumResponseDto() {
     }
@@ -62,6 +63,14 @@ public class StadiumResponseDto {
         this.available = available;
     }
 
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
+    }
+
     public static StadiumResponseDto fromEntity(Stadium stadium) {
         StadiumResponseDto dto = new StadiumResponseDto();
         dto.setId(stadium.getId());
@@ -70,6 +79,7 @@ public class StadiumResponseDto {
         dto.setLocation(stadium.getLocation());
         dto.setCapacity(stadium.getCapacity());
         dto.setAvailable(stadium.getAvailable());
+        dto.setOwnerId(stadium.getOwnerId());
         return dto;
     }
 }

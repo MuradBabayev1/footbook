@@ -2,6 +2,7 @@ package com.example.footbook.enums;
 
 public enum UserRole {
     ADMIN("Administrator"),
+    OWNER("Stadium Owner"),
     USER("Regular User"),
     STADIUM_MANAGER("Stadium Manager");
 

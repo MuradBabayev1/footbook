@@ -192,7 +192,25 @@ input {
     transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 
+select {
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 13px;
+    padding: 12px 13px;
+    font: inherit;
+    color: var(--text);
+    background: #fffcf8;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
 input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px rgba(28, 138, 116, 0.15);
+    transform: translateY(-1px);
+}
+
+select:focus {
     outline: none;
     border-color: var(--accent);
     box-shadow: 0 0 0 4px rgba(28, 138, 116, 0.15);

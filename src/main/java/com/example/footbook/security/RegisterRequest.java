@@ -21,6 +21,8 @@ public class RegisterRequest {
     @Size(min = 6, message = "Password should be at least 6 characters")
     private String password;
 
+    private String accountType;
+
     public RegisterRequest() {
     }
 
@@ -54,5 +56,13 @@ public class RegisterRequest {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getAccountType() {
+        return accountType;
+    }
+
+    public void setAccountType(String accountType) {
+        this.accountType = accountType;
     }
 }

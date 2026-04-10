@@ -69,6 +69,21 @@ body::after {
     backdrop-filter: blur(8px);
 }
 
+.site-header,
+.topbar,
+.top,
+.hero,
+.spotlight,
+.story-pane,
+.panel,
+.feature-card,
+.stadium-card,
+.metric-card,
+.table-wrap {
+    position: relative;
+    overflow: hidden;
+}
+
 h1,
 h2,
 h3,
@@ -88,6 +103,63 @@ h3,
 .hero,
 .spotlight {
     border: 1px solid rgba(238, 255, 244, 0.22);
+}
+
+.site-header::after,
+.topbar::after,
+.top::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 5px;
+    background: linear-gradient(90deg, var(--jersey-gold), var(--jersey-orange), var(--jersey-green));
+}
+
+.hero::before,
+.spotlight::before,
+.story-pane::before {
+    content: "";
+    position: absolute;
+    width: 280px;
+    height: 280px;
+    right: -110px;
+    bottom: -130px;
+    border-radius: 50%;
+    border: 2px solid rgba(236, 253, 245, 0.34);
+    box-shadow: 0 0 0 42px rgba(236, 253, 245, 0.05);
+    pointer-events: none;
+}
+
+.feature-card::before,
+.stadium-card::before,
+.metric-card::before,
+.card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 46px;
+    height: 46px;
+    background: linear-gradient(135deg, rgba(240, 195, 79, 0.95), rgba(243, 121, 63, 0.9));
+    clip-path: polygon(0 0, 100% 0, 0 100%);
+    opacity: 0.74;
+}
+
+.feature-card::after,
+.stadium-card::after,
+.metric-card::after,
+.card::after {
+    content: "";
+    position: absolute;
+    right: 14px;
+    top: 12px;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 2px solid rgba(31, 106, 51, 0.45);
+    opacity: 0.36;
 }
 
 .btn,
@@ -133,6 +205,22 @@ h3,
 .chip.unavailable {
     background: rgba(245, 158, 11, 0.16);
     color: #9a3412;
+}
+
+thead,
+.jump-nav {
+    background:
+        linear-gradient(180deg, rgba(241, 255, 246, 0.96), rgba(227, 245, 235, 0.94)),
+        repeating-linear-gradient(
+            90deg,
+            rgba(22, 101, 52, 0.08) 0 1px,
+            transparent 1px 22px
+        );
+}
+
+th {
+    letter-spacing: 0.1em;
+    color: #1f5f35;
 }
 
 .site-footer,

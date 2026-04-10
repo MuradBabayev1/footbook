@@ -2,10 +2,13 @@ package com.example.footbook.controller;
 
 import com.example.footbook.dto.StadiumRequestDto;
 import com.example.footbook.dto.StadiumResponseDto;
+import com.example.footbook.entity.Owner;
 import com.example.footbook.entity.Stadium;
+import com.example.footbook.repository.OwnerRepository;
 import com.example.footbook.service.StadiumService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,9 +26,11 @@ import java.util.List;
 public class StadiumController {
 
     private final StadiumService stadiumService;
+    private final OwnerRepository ownerRepository;
 
-    public StadiumController(StadiumService stadiumService) {
+    public StadiumController(StadiumService stadiumService, OwnerRepository ownerRepository) {
         this.stadiumService = stadiumService;
+        this.ownerRepository = ownerRepository;
     }
 
     @GetMapping
@@ -56,9 +61,18 @@ public class StadiumController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createStadium(@RequestBody StadiumRequestDto payload) {
+    public ResponseEntity<?> createStadium(@RequestBody StadiumRequestDto payload, Authentication authentication) {
         try {
-            Stadium stadium = stadiumService.createStadium(payload);
+            if (authentication == null || authentication.getName() == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
+
+            Owner owner = ownerRepository.findByUserEmail(authentication.getName()).orElse(null);
+            if (owner == null) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Only owners can add stadiums");
+            }
+
+            Stadium stadium = stadiumService.createStadium(payload, owner);
             return ResponseEntity.status(HttpStatus.CREATED).body(StadiumResponseDto.fromEntity(stadium));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());

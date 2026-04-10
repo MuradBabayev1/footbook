@@ -16,6 +16,7 @@ form.addEventListener("submit", async (event) => {
     const phoneNumber = form.phoneNumber.value.trim();
     const password = form.password.value;
     const confirmPassword = form.confirmPassword.value;
+    const accountType = form.accountType ? String(form.accountType.value || "USER").toUpperCase() : "USER";
 
     if (!fullName || !email || !phoneNumber || !password || !confirmPassword) {
         status.textContent = "Please fill in all fields.";
@@ -53,7 +54,8 @@ form.addEventListener("submit", async (event) => {
                 fullName,
                 email,
                 phoneNumber,
-                password
+                password,
+                accountType
             })
         });
 

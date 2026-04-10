@@ -345,11 +345,13 @@ stadiumSearch.addEventListener("input", () => {
 refreshStadiums.addEventListener("click", loadStadiums);
 refreshBookings.addEventListener("click", loadBookings);
 bookingForm.addEventListener("submit", createBooking);
-logoutLink.addEventListener("click", () => {
+logoutLink.addEventListener("click", (event) => {
+    event.preventDefault();
     localStorage.removeItem("footbook.token");
     localStorage.removeItem("footbook.user");
     sessionStorage.removeItem("footbook.token");
     sessionStorage.removeItem("footbook.user");
+    window.location.href = "index.html";
 });
 
 stadiumGrid.addEventListener("click", (event) => {

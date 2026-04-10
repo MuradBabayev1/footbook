@@ -1,7 +1,7 @@
 const token = localStorage.getItem("footbook.token") || sessionStorage.getItem("footbook.token");
 const rawUser = localStorage.getItem("footbook.user") || sessionStorage.getItem("footbook.user");
 const sessionInfo = document.getElementById("sessionInfo");
-const logoutLink = document.querySelector('a[href="login.html"]');
+const logoutLink = document.getElementById("adminLogoutLink");
 const addStadiumBtn = document.getElementById("addStadiumBtn");
 const refreshStadiumBtn = document.getElementById("refreshStadiumBtn");
 const cancelStadiumBtn = document.getElementById("cancelStadiumBtn");
@@ -64,7 +64,7 @@ if (logoutLink) {
         localStorage.removeItem("footbook.user");
         sessionStorage.removeItem("footbook.token");
         sessionStorage.removeItem("footbook.user");
-        window.location.href = "login.html";
+        window.location.href = "index.html";
     });
 }
 

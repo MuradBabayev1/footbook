@@ -1,6 +1,9 @@
 package com.example.footbook.controller;
 
 import com.example.footbook.entity.User;
+import com.example.footbook.entity.Owner;
+import com.example.footbook.enums.UserRole;
+import com.example.footbook.repository.OwnerRepository;
 import com.example.footbook.repository.UserRepository;
 import com.example.footbook.security.JwtTokenProvider;
 import com.example.footbook.security.LoginRequest;
@@ -25,6 +28,9 @@ public class AuthenticationController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private OwnerRepository ownerRepository;
 
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
@@ -77,11 +83,27 @@ public class AuthenticationController {
         user.setEmail(registerRequest.getEmail());
         user.setPhoneNumber(registerRequest.getPhoneNumber());
         user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
+        String accountType = registerRequest.getAccountType() != null
+                ? registerRequest.getAccountType().trim().toUpperCase()
+                : "USER";
+        if (!"USER".equals(accountType) && !"OWNER".equals(accountType)) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "Invalid account type");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        }
+        user.setRole("OWNER".equals(accountType) ? UserRole.OWNER : UserRole.USER);
         User savedUser = userRepository.save(user);
+
+        if (savedUser.getRole() == UserRole.OWNER) {
+            Owner owner = new Owner();
+            owner.setUser(savedUser);
+            ownerRepository.save(owner);
+        }
 
         Map<String, Object> response = new HashMap<>();
         response.put("message", "Account created successfully. Please sign in.");
         response.put("userId", savedUser.getId());
+        response.put("role", savedUser.getRole().name());
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
