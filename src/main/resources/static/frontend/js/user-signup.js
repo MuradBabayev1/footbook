@@ -67,7 +67,9 @@ form.addEventListener("submit", async (event) => {
             return;
         }
 
-        status.textContent = data.message || "Account created successfully. Please sign in.";
+        const role = String(data.role || accountType || "USER").toUpperCase();
+        const roleLabel = role === "OWNER" ? "Owner" : "User";
+        status.textContent = `${data.message || "Account created successfully."} Account type: ${roleLabel}.`;
         status.classList.add("ok");
 
         window.setTimeout(() => {

@@ -34,6 +34,9 @@ public class Stadium {
     @Column(nullable = false)
     private Boolean available = true;
 
+    @Column(name = "owner_id", insertable = false, updatable = false)
+    private Long ownerId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id", foreignKey = @ForeignKey(name = "fk_stadium_owner"))
     private Owner owner;
@@ -98,6 +101,9 @@ public class Stadium {
     }
 
     public Long getOwnerId() {
+        if (ownerId != null) {
+            return ownerId;
+        }
         return owner != null ? owner.getId() : null;
     }
 }

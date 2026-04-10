@@ -36,6 +36,10 @@ if (!token) {
 if (rawUser) {
     try {
         currentUser = JSON.parse(rawUser);
+        const role = String(currentUser.role || "USER").toUpperCase();
+        if (role === "OWNER") {
+            window.location.href = "owner-dashboard.html";
+        }
         userNameEl.textContent = currentUser.fullName || currentUser.email || "Player";
         userEmailEl.textContent = currentUser.email || "";
     } catch (error) {

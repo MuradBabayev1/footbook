@@ -17,4 +17,8 @@ public interface StadiumRepository extends JpaRepository<Stadium, Long> {
     List<Stadium> findByAvailable(Boolean available);
     
     List<Stadium> findByCityAndAvailable(String city, Boolean available);
+
+    List<Stadium> findByOwnerId(Long ownerId);
+
+    Optional<Stadium> findByIdAndOwnerId(Long id, Long ownerId);
 }

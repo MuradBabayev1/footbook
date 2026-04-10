@@ -60,14 +60,23 @@ public class StadiumController {
                 .toList();
     }
 
+    @GetMapping("/owner/mine")
+    public ResponseEntity<?> getMyStadiums(Authentication authentication) {
+        Owner owner = resolveOwner(authentication);
+        if (owner == null) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Only owners can access this endpoint");
+        }
+
+        List<StadiumResponseDto> stadiums = stadiumService.getStadiumsByOwnerId(owner.getId()).stream()
+                .map(StadiumResponseDto::fromEntity)
+                .toList();
+        return ResponseEntity.ok(stadiums);
+    }
+
     @PostMapping
     public ResponseEntity<?> createStadium(@RequestBody StadiumRequestDto payload, Authentication authentication) {
         try {
-            if (authentication == null || authentication.getName() == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-            }
-
-            Owner owner = ownerRepository.findByUserEmail(authentication.getName()).orElse(null);
+            Owner owner = resolveOwner(authentication);
             if (owner == null) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Only owners can add stadiums");
             }
@@ -77,6 +86,37 @@ public class StadiumController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+
+    @PutMapping("/owner/{id}")
+    public ResponseEntity<?> updateOwnerStadium(@PathVariable Long id,
+                                                @RequestBody StadiumRequestDto payload,
+                                                Authentication authentication) {
+        try {
+            Owner owner = resolveOwner(authentication);
+            if (owner == null) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Only owners can update stadiums");
+            }
+
+            return stadiumService.updateOwnerStadium(owner.getId(), id, payload)
+                    .map(stadium -> ResponseEntity.ok(StadiumResponseDto.fromEntity(stadium)))
+                    .orElse(ResponseEntity.notFound().build());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/owner/{id}")
+    public ResponseEntity<?> deleteOwnerStadium(@PathVariable Long id, Authentication authentication) {
+        Owner owner = resolveOwner(authentication);
+        if (owner == null) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Only owners can delete stadiums");
+        }
+
+        if (stadiumService.deleteOwnerStadium(owner.getId(), id)) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Stadium not found for this owner");
     }
 
     @PutMapping("/{id}")
@@ -96,5 +136,12 @@ public class StadiumController {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();
+    }
+
+    private Owner resolveOwner(Authentication authentication) {
+        if (authentication == null || authentication.getName() == null) {
+            return null;
+        }
+        return ownerRepository.findByUserEmail(authentication.getName()).orElse(null);
     }
 }

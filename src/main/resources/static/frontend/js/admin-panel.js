@@ -165,7 +165,7 @@ function renderUsersEmptyState(message) {
         return;
     }
 
-    usersTableBody.innerHTML = `<tr><td colspan="5" class="empty-state">${message}</td></tr>`;
+    usersTableBody.innerHTML = `<tr><td colspan="6" class="empty-state">${message}</td></tr>`;
 }
 
 function renderUsers(users) {
@@ -184,6 +184,7 @@ function renderUsers(users) {
             <td>${escapeHtml(user.fullName || "-")}</td>
             <td>${escapeHtml(user.email || "-")}</td>
             <td>${escapeHtml(user.phoneNumber || "-")}</td>
+            <td><span class="status ${String(user.role || "").toUpperCase() === "OWNER" ? "confirmed" : "pending"}">${escapeHtml(String(user.role || "USER").toUpperCase())}</span></td>
             <td>
                 <div class="table-actions">
                     <button type="button" class="delete" data-user-action="delete" data-user-id="${user.id}">Delete</button>

@@ -44,6 +44,10 @@ public class StadiumService {
         return stadiumRepository.findByCityAndAvailable(city, true);
     }
 
+    public List<Stadium> getStadiumsByOwnerId(Long ownerId) {
+        return stadiumRepository.findByOwnerId(ownerId);
+    }
+
     public Stadium createStadium(StadiumRequestDto requestDto, Owner owner) {
         if (owner == null) {
             throw new IllegalArgumentException("owner is required to create a stadium");
@@ -93,11 +97,41 @@ public class StadiumService {
         });
     }
 
+    public Optional<Stadium> updateOwnerStadium(Long ownerId, Long id, StadiumRequestDto requestDto) {
+        return stadiumRepository.findByIdAndOwnerId(id, ownerId).map(stadium -> {
+            if (requestDto.getName() != null && !requestDto.getName().isBlank()) {
+                stadium.setName(requestDto.getName());
+            }
+            if (requestDto.getCity() != null && !requestDto.getCity().isBlank()) {
+                stadium.setCity(requestDto.getCity());
+            }
+            if (requestDto.getLocation() != null && !requestDto.getLocation().isBlank()) {
+                stadium.setLocation(requestDto.getLocation());
+            }
+            if (requestDto.getCapacity() != null && requestDto.getCapacity() > 0) {
+                stadium.setCapacity(requestDto.getCapacity());
+            }
+            if (requestDto.getAvailable() != null) {
+                stadium.setAvailable(requestDto.getAvailable());
+            }
+            return stadiumRepository.save(stadium);
+        });
+    }
+
     public boolean deleteStadium(Long id) {
         if (stadiumRepository.existsById(id)) {
             stadiumRepository.deleteById(id);
             return true;
         }
         return false;
+    }
+
+    public boolean deleteOwnerStadium(Long ownerId, Long id) {
+        return stadiumRepository.findByIdAndOwnerId(id, ownerId)
+                .map(stadium -> {
+                    stadiumRepository.delete(stadium);
+                    return true;
+                })
+                .orElse(false);
     }
 }

@@ -3,8 +3,15 @@ const status = document.getElementById("status");
 const API_BASE = "/api/auth";
 
 const existingToken = localStorage.getItem("footbook.token") || sessionStorage.getItem("footbook.token");
-if (existingToken) {
-    window.location.href = "user-dashboard.html";
+const existingUserRaw = localStorage.getItem("footbook.user") || sessionStorage.getItem("footbook.user");
+if (existingToken && existingUserRaw) {
+    try {
+        const existingUser = JSON.parse(existingUserRaw);
+        const existingRole = String(existingUser.role || "USER").toUpperCase();
+        window.location.href = existingRole === "OWNER" ? "owner-dashboard.html" : "user-dashboard.html";
+    } catch (error) {
+        window.location.href = "user-dashboard.html";
+    }
 }
 
 form.addEventListener("submit", async (event) => {
@@ -66,7 +73,7 @@ form.addEventListener("submit", async (event) => {
         status.classList.add("ok");
 
         window.setTimeout(() => {
-            window.location.href = "user-dashboard.html";
+            window.location.href = role === "OWNER" ? "owner-dashboard.html" : "user-dashboard.html";
         }, 400);
     } catch (error) {
         status.textContent = "Server unreachable. Please try again.";
