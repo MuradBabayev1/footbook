@@ -30,34 +30,47 @@ public class BookingService {
         this.stadiumRepository = stadiumRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<Booking> getAllBookings() {
         return bookingRepository.findAll();
     }
 
+    @Transactional(readOnly = true)
     public Optional<Booking> getBookingById(Long id) {
         return bookingRepository.findById(id);
     }
 
+    @Transactional(readOnly = true)
     public List<Booking> getBookingsByUserId(Long userId) {
         return bookingRepository.findByUserId(userId);
     }
 
+    @Transactional(readOnly = true)
     public List<Booking> getBookingsByStadiumId(Long stadiumId) {
         return bookingRepository.findByStadiumId(stadiumId);
     }
 
+    @Transactional(readOnly = true)
+    public List<Booking> getBookingsByUserIdAndStadiumId(Long userId, Long stadiumId) {
+        return bookingRepository.findByUserIdAndStadiumId(userId, stadiumId);
+    }
+
+    @Transactional(readOnly = true)
     public List<Booking> getBookingsByStatus(BookingStatus status) {
         return bookingRepository.findByStatus(status);
     }
 
+    @Transactional(readOnly = true)
     public List<Booking> getBookingsByBookingDate(LocalDate bookingDate) {
         return bookingRepository.findByBookingDate(bookingDate);
     }
 
+    @Transactional(readOnly = true)
     public List<Booking> getBookingsByStadiumIdAndDate(Long stadiumId, LocalDate bookingDate) {
         return bookingRepository.findByStadiumIdAndBookingDate(stadiumId, bookingDate);
     }
 
+    @Transactional(readOnly = true)
     public List<Booking> getBookingsByUserIdAndStatus(Long userId, BookingStatus status) {
         return bookingRepository.findByUserIdAndStatus(userId, status);
     }

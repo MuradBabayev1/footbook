@@ -6,6 +6,7 @@ import com.example.footbook.entity.Owner;
 import com.example.footbook.entity.Stadium;
 import com.example.footbook.repository.OwnerRepository;
 import com.example.footbook.service.StadiumService;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -34,6 +35,7 @@ public class StadiumController {
     }
 
     @GetMapping
+    @Cacheable("stadiums-all")
     public List<StadiumResponseDto> getAllStadiums() {
         return stadiumService.getAllStadiums().stream()
                 .map(StadiumResponseDto::fromEntity)
@@ -41,6 +43,7 @@ public class StadiumController {
     }
 
     @GetMapping("/{id}")
+    @Cacheable(value = "stadiums-by-id", key = "#id")
     public ResponseEntity<StadiumResponseDto> getStadiumById(@PathVariable Long id) {
         return stadiumService.getStadiumById(id)
                 .map(stadium -> ResponseEntity.ok(StadiumResponseDto.fromEntity(stadium)))
@@ -48,6 +51,7 @@ public class StadiumController {
     }
 
     @GetMapping("/available")
+    @Cacheable(value = "stadiums-available", key = "#city == null ? 'all' : #city")
     public List<StadiumResponseDto> getAvailableStadiums(@RequestParam(required = false) String city) {
         List<Stadium> stadiums;
         if (city != null && !city.isBlank()) {
@@ -61,6 +65,7 @@ public class StadiumController {
     }
 
     @GetMapping("/owner/mine")
+    @Cacheable(value = "owner-stadiums", key = "authentication != null ? authentication.name : 'anonymous'")
     public ResponseEntity<?> getMyStadiums(Authentication authentication) {
         Owner owner = resolveOwner(authentication);
         if (owner == null) {

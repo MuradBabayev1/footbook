@@ -4,6 +4,8 @@ import com.example.footbook.dto.StadiumRequestDto;
 import com.example.footbook.entity.Owner;
 import com.example.footbook.entity.Stadium;
 import com.example.footbook.repository.StadiumRepository;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,34 +22,47 @@ public class StadiumService {
         this.stadiumRepository = stadiumRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<Stadium> getAllStadiums() {
         return stadiumRepository.findAll();
     }
 
+    @Transactional(readOnly = true)
     public Optional<Stadium> getStadiumById(Long id) {
         return stadiumRepository.findById(id);
     }
 
+    @Transactional(readOnly = true)
     public Optional<Stadium> getStadiumByName(String name) {
         return stadiumRepository.findByName(name);
     }
 
+    @Transactional(readOnly = true)
     public List<Stadium> getStadiumsByCity(String city) {
         return stadiumRepository.findByCity(city);
     }
 
+    @Transactional(readOnly = true)
     public List<Stadium> getAvailableStadiums() {
         return stadiumRepository.findByAvailable(true);
     }
 
+    @Transactional(readOnly = true)
     public List<Stadium> getAvailableStadiumsByCity(String city) {
         return stadiumRepository.findByCityAndAvailable(city, true);
     }
 
+    @Transactional(readOnly = true)
     public List<Stadium> getStadiumsByOwnerId(Long ownerId) {
         return stadiumRepository.findByOwnerId(ownerId);
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "stadiums-all", allEntries = true),
+            @CacheEvict(value = "stadiums-by-id", allEntries = true),
+            @CacheEvict(value = "stadiums-available", allEntries = true),
+            @CacheEvict(value = "owner-stadiums", allEntries = true)
+    })
     public Stadium createStadium(StadiumRequestDto requestDto, Owner owner) {
         if (owner == null) {
             throw new IllegalArgumentException("owner is required to create a stadium");
@@ -76,6 +91,12 @@ public class StadiumService {
         return stadiumRepository.save(stadium);
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "stadiums-all", allEntries = true),
+            @CacheEvict(value = "stadiums-by-id", key = "#id"),
+            @CacheEvict(value = "stadiums-available", allEntries = true),
+            @CacheEvict(value = "owner-stadiums", allEntries = true)
+    })
     public Optional<Stadium> updateStadium(Long id, StadiumRequestDto requestDto) {
         return stadiumRepository.findById(id).map(stadium -> {
             if (requestDto.getName() != null && !requestDto.getName().isBlank()) {
@@ -97,6 +118,12 @@ public class StadiumService {
         });
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "stadiums-all", allEntries = true),
+            @CacheEvict(value = "stadiums-by-id", key = "#id"),
+            @CacheEvict(value = "stadiums-available", allEntries = true),
+            @CacheEvict(value = "owner-stadiums", key = "#ownerId")
+    })
     public Optional<Stadium> updateOwnerStadium(Long ownerId, Long id, StadiumRequestDto requestDto) {
         return stadiumRepository.findByIdAndOwnerId(id, ownerId).map(stadium -> {
             if (requestDto.getName() != null && !requestDto.getName().isBlank()) {
@@ -118,6 +145,12 @@ public class StadiumService {
         });
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "stadiums-all", allEntries = true),
+            @CacheEvict(value = "stadiums-by-id", key = "#id"),
+            @CacheEvict(value = "stadiums-available", allEntries = true),
+            @CacheEvict(value = "owner-stadiums", allEntries = true)
+    })
     public boolean deleteStadium(Long id) {
         if (stadiumRepository.existsById(id)) {
             stadiumRepository.deleteById(id);
@@ -126,6 +159,12 @@ public class StadiumService {
         return false;
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "stadiums-all", allEntries = true),
+            @CacheEvict(value = "stadiums-by-id", key = "#id"),
+            @CacheEvict(value = "stadiums-available", allEntries = true),
+            @CacheEvict(value = "owner-stadiums", key = "#ownerId")
+    })
     public boolean deleteOwnerStadium(Long ownerId, Long id) {
         return stadiumRepository.findByIdAndOwnerId(id, ownerId)
                 .map(stadium -> {
