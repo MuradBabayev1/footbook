@@ -6,33 +6,17 @@ Footbook is a Spring Boot application for football stadium booking with role-bas
 
 - Java 21
 - Spring Boot 4.0.5
-- Spring Security + JWT
 - Spring Data JPA (MySQL)
 - Spring Cache + Redis
 - Maven
 
 ## Features
 
-- JWT authentication (`/api/auth/login`, `/api/auth/register`)
-- Role-based authorization (`ADMIN`, `OWNER`, `USER`)
-- Stadium management for owners and admins
+- Stadium management for owners
 - Booking creation and status updates
-- User management for admins
+- User management
 - Redis-backed caching for high-read stadium endpoints
 - Static frontend pages served from `src/main/resources/static/frontend`
-
-## Roles and Access
-
-- `USER`
-  - Can create and view own bookings
-  - Can cancel own bookings
-- `OWNER`
-  - Can create stadiums
-  - Can manage only own stadiums (`/api/stadiums/owner/**`)
-- `ADMIN`
-  - Can manage all users
-  - Can update/delete any stadium
-  - Can promote users to owner
 
 ## Prerequisites
 
@@ -51,24 +35,10 @@ The app uses environment-variable-friendly defaults in `src/main/resources/appli
 - `DB_USERNAME` (default: `root`)
 - `DB_PASSWORD` (default from properties file)
 
-### JWT
-
-- `JWT_SECRET` (set a strong value in non-dev environments)
-- `JWT_EXPIRATION` (default: `86400000`, milliseconds)
-
 ### Redis Cache
 
 - `REDIS_HOST` (default: `localhost`)
 - `REDIS_PORT` (default: `6379`)
-
-### Bootstrap Admin
-
-- `ADMIN_BOOTSTRAP_ENABLED` (default: `true`)
-- `ADMIN_FULL_NAME` (default: `Footbook Admin`)
-- `ADMIN_EMAIL` (default: `admin@footbook.com`)
-- `ADMIN_PHONE` (default: `+10000000000`)
-- `ADMIN_PASSWORD` (default: `admin123456`)
-- `ADMIN_RESET_PASSWORD` (default: `true`)
 
 ## Run Locally
 
@@ -105,12 +75,6 @@ Compile only:
 
 ## API Overview
 
-### Auth
-
-- `POST /api/auth/register`
-- `POST /api/auth/login`
-- `POST /api/auth/logout`
-
 ### Stadiums
 
 Public reads:
@@ -126,20 +90,15 @@ Owner operations:
 - `PUT /api/stadiums/owner/{id}`
 - `DELETE /api/stadiums/owner/{id}`
 
-Admin operations:
-
-- `PUT /api/stadiums/{id}`
-- `DELETE /api/stadiums/{id}`
-
 ### Bookings
 
-- `GET /api/bookings` (authenticated; scoped to current user unless admin)
+- `GET /api/bookings`
 - `GET /api/bookings/{id}`
 - `POST /api/bookings`
 - `PATCH /api/bookings/{id}/status`
-- `DELETE /api/bookings/{id}` (admin only)
+- `DELETE /api/bookings/{id}`
 
-### Users (admin only)
+### Users
 
 - `GET /api/users`
 - `GET /api/users/{id}`
@@ -147,7 +106,7 @@ Admin operations:
 - `PUT /api/users/{id}`
 - `DELETE /api/users/{id}`
 
-### Owner Promotion (admin only)
+### Owner Promotion
 
 - `POST /api/owners/promote/{userId}`
 
@@ -164,13 +123,6 @@ Caching is enabled at application level and currently targets stadium-heavy read
 
 If Redis is unavailable, caching calls can fail at runtime. Keep Redis running in local/dev environments when cache type is set to Redis.
 
-## Security Notes
-
-- JWT is required for protected endpoints.
-- Passwords are hashed with BCrypt.
-- Set a strong `JWT_SECRET` in production.
-- Restrict CORS origins in production.
-
 ## Project Structure
 
 - `src/main/java/com/example/footbook`
@@ -178,7 +130,6 @@ If Redis is unavailable, caching calls can fail at runtime. Keep Redis running i
   - `service` business logic
   - `repository` Spring Data repositories
   - `entity` JPA entities
-  - `security` JWT and security config
   - `config` application configuration
 - `src/main/resources/static/frontend`
   - HTML/CSS/JS frontend pages
