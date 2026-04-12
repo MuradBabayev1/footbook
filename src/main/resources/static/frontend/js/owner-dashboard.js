@@ -43,6 +43,8 @@ if (role !== "OWNER") {
     window.location.href = "user-dashboard.html";
 }
 
+document.body.classList.add("auth-ready");
+
 if (ownerInfo && currentUser) {
     ownerInfo.textContent = `Signed in as ${currentUser.fullName || currentUser.email || "Owner"}`;
 }

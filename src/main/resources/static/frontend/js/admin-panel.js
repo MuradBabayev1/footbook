@@ -45,6 +45,7 @@ if (rawUser && sessionInfo) {
         }
         const name = user.fullName || user.email || "Admin";
         sessionInfo.textContent = `Signed in: ${name}`;
+        document.body.classList.add("auth-ready");
     } catch (error) {
         sessionInfo.textContent = "Live mode: Active";
         localStorage.removeItem("footbook.token");

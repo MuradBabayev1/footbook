@@ -3,6 +3,7 @@ package com.example.footbook.service;
 import com.example.footbook.dto.StadiumRequestDto;
 import com.example.footbook.entity.Owner;
 import com.example.footbook.entity.Stadium;
+import com.example.footbook.repository.BookingRepository;
 import com.example.footbook.repository.StadiumRepository;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Caching;
@@ -17,9 +18,11 @@ import java.util.Optional;
 public class StadiumService {
 
     private final StadiumRepository stadiumRepository;
+    private final BookingRepository bookingRepository;
 
-    public StadiumService(StadiumRepository stadiumRepository) {
+    public StadiumService(StadiumRepository stadiumRepository, BookingRepository bookingRepository) {
         this.stadiumRepository = stadiumRepository;
+        this.bookingRepository = bookingRepository;
     }
 
     @Transactional(readOnly = true)
@@ -153,6 +156,7 @@ public class StadiumService {
     })
     public boolean deleteStadium(Long id) {
         if (stadiumRepository.existsById(id)) {
+            bookingRepository.deleteByStadiumId(id);
             stadiumRepository.deleteById(id);
             return true;
         }
@@ -168,6 +172,7 @@ public class StadiumService {
     public boolean deleteOwnerStadium(Long ownerId, Long id) {
         return stadiumRepository.findByIdAndOwnerId(id, ownerId)
                 .map(stadium -> {
+                    bookingRepository.deleteByStadiumId(stadium.getId());
                     stadiumRepository.delete(stadium);
                     return true;
                 })

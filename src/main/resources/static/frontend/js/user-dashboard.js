@@ -47,6 +47,8 @@ if (rawUser) {
     }
 }
 
+document.body.classList.add("auth-ready");
+
 function authHeaders(includeJson = true) {
     const headers = { Authorization: `Bearer ${token}` };
     if (includeJson) {
