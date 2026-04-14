@@ -176,30 +176,38 @@ async function fetchStadiumList(url) {
 }
 
 async function loadStadiums() {
+    setStatus("Loading stadiums...");
+
+    let loadedStadiums = [];
     try {
-        setStatus("Loading stadiums...");
-        let loadedStadiums = await fetchStadiumList(`${API_BASE}/stadiums/available`);
-        if (loadedStadiums === null) {
+        const primary = await fetchStadiumList(`${API_BASE}/stadiums/available`);
+        if (primary === null) {
             return;
         }
+        loadedStadiums = primary;
+    } catch (error) {
+        loadedStadiums = [];
+    }
 
-        if (!loadedStadiums.length) {
+    if (!loadedStadiums.length) {
+        try {
             const fallbackStadiums = await fetchStadiumList(`${API_BASE}/stadiums`);
             if (fallbackStadiums === null) {
                 return;
             }
             loadedStadiums = normalizeAvailableStadiums(fallbackStadiums);
+        } catch (error) {
+            stadiumGrid.innerHTML = '<div class="empty-state">Unable to load stadiums.</div>';
+            setStatus("Unable to load stadiums.", "error");
+            return;
         }
-
-        stadiums = loadedStadiums;
-        availableCount.textContent = String(stadiums.length);
-        renderStadiumOptions(stadiums);
-        renderStadiumGrid(applySearchFilter(stadiums));
-        setStatus("Dashboard ready.");
-    } catch (error) {
-        stadiumGrid.innerHTML = '<div class="empty-state">Unable to load stadiums.</div>';
-        setStatus("Unable to load stadiums.", "error");
     }
+
+    stadiums = loadedStadiums;
+    availableCount.textContent = String(stadiums.length);
+    renderStadiumOptions(stadiums);
+    renderStadiumGrid(applySearchFilter(stadiums));
+    setStatus("Dashboard ready.");
 }
 
 function applySearchFilter(items) {
