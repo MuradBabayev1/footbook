@@ -158,16 +158,40 @@ function getStadiumName(stadiumId) {
     return stadium ? stadium.name : `Stadium #${stadiumId}`;
 }
 
+function normalizeAvailableStadiums(items) {
+    return items.filter((stadium) => stadium && stadium.available !== false);
+}
+
+async function fetchStadiumList(url) {
+    const response = await fetch(url, { headers: authHeaders(false) });
+    if (response.status === 401 || response.status === 403) {
+        window.location.href = "user-login.html";
+        return null;
+    }
+    if (!response.ok) {
+        throw new Error(`Stadium request failed: ${response.status}`);
+    }
+    const data = await response.json().catch(() => []);
+    return Array.isArray(data) ? data : [];
+}
+
 async function loadStadiums() {
     try {
         setStatus("Loading stadiums...");
-        const response = await fetch(`${API_BASE}/stadiums/available`, { headers: authHeaders(false) });
-        if (response.status === 401 || response.status === 403) {
-            window.location.href = "user-login.html";
+        let loadedStadiums = await fetchStadiumList(`${API_BASE}/stadiums/available`);
+        if (loadedStadiums === null) {
             return;
         }
-        const data = await response.json().catch(() => []);
-        stadiums = Array.isArray(data) ? data : [];
+
+        if (!loadedStadiums.length) {
+            const fallbackStadiums = await fetchStadiumList(`${API_BASE}/stadiums`);
+            if (fallbackStadiums === null) {
+                return;
+            }
+            loadedStadiums = normalizeAvailableStadiums(fallbackStadiums);
+        }
+
+        stadiums = loadedStadiums;
         availableCount.textContent = String(stadiums.length);
         renderStadiumOptions(stadiums);
         renderStadiumGrid(applySearchFilter(stadiums));
