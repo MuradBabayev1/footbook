@@ -6,6 +6,7 @@ import com.example.footbook.repository.BookingRepository;
 import com.example.footbook.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,10 +17,12 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository, BookingRepository bookingRepository) {
+    public UserService(UserRepository userRepository, BookingRepository bookingRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.bookingRepository = bookingRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public List<User> getAllUsers() {
@@ -44,6 +47,9 @@ public class UserService {
         if (requestDto.getPhoneNumber() == null || requestDto.getPhoneNumber().isBlank()) {
             throw new IllegalArgumentException("phoneNumber is required");
         }
+        if (requestDto.getPassword() == null || requestDto.getPassword().isBlank()) {
+            throw new IllegalArgumentException("password is required");
+        }
 
         if (userRepository.existsByEmail(requestDto.getEmail())) {
             throw new IllegalArgumentException("Email already exists");
@@ -53,6 +59,7 @@ public class UserService {
         user.setFullName(requestDto.getFullName());
         user.setEmail(requestDto.getEmail());
         user.setPhoneNumber(requestDto.getPhoneNumber());
+        user.setPassword(passwordEncoder.encode(requestDto.getPassword()));
 
         return userRepository.save(user);
     }
@@ -70,6 +77,9 @@ public class UserService {
             }
             if (requestDto.getPhoneNumber() != null && !requestDto.getPhoneNumber().isBlank()) {
                 user.setPhoneNumber(requestDto.getPhoneNumber());
+            }
+            if (requestDto.getPassword() != null && !requestDto.getPassword().isBlank()) {
+                user.setPassword(passwordEncoder.encode(requestDto.getPassword()));
             }
             return userRepository.save(user);
         });

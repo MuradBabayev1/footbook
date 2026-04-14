@@ -9,6 +9,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.time.Instant;
 
 @Entity
 @Table(name = "users")
@@ -32,6 +33,12 @@ public class User {
 
     @Column(name = "email_verified", nullable = false)
     private Boolean emailVerified = false;
+
+    @Column(name = "email_verification_code")
+    private String emailVerificationCode;
+
+    @Column(name = "email_verification_expires_at")
+    private Instant emailVerificationExpiresAt;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -86,6 +93,22 @@ public class User {
 
     public void setEmailVerified(Boolean emailVerified) {
         this.emailVerified = emailVerified;
+    }
+
+    public String getEmailVerificationCode() {
+        return emailVerificationCode;
+    }
+
+    public void setEmailVerificationCode(String emailVerificationCode) {
+        this.emailVerificationCode = emailVerificationCode;
+    }
+
+    public Instant getEmailVerificationExpiresAt() {
+        return emailVerificationExpiresAt;
+    }
+
+    public void setEmailVerificationExpiresAt(Instant emailVerificationExpiresAt) {
+        this.emailVerificationExpiresAt = emailVerificationExpiresAt;
     }
 
     public UserRole getRole() {

@@ -67,6 +67,8 @@ public class FootbookApplication {
 			admin.setPhoneNumber(phone);
 			admin.setRole(UserRole.ADMIN);
 			admin.setEmailVerified(true);
+			admin.setEmailVerificationCode(null);
+			admin.setEmailVerificationExpiresAt(null);
 
 			if (admin.getId() == null || resetPassword) {
 				admin.setPassword(passwordEncoder.encode(password));

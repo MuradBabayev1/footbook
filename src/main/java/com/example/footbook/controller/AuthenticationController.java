@@ -9,7 +9,11 @@ import com.example.footbook.security.JwtTokenProvider;
 import com.example.footbook.security.LoginRequest;
 import com.example.footbook.security.LoginResponse;
 import com.example.footbook.security.RegisterRequest;
+import com.example.footbook.security.ResendVerificationRequest;
+import com.example.footbook.security.VerifyEmailRequest;
+import com.example.footbook.service.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -19,6 +23,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
+import java.security.SecureRandom;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,6 +45,14 @@ public class AuthenticationController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private EmailService emailService;
+
+    @Value("${footbook.verification.code-exp-minutes:15}")
+    private long verificationCodeExpiryMinutes;
+
+    private final SecureRandom secureRandom = new SecureRandom();
+
     /**
      * Login endpoint
      */
@@ -46,6 +61,11 @@ public class AuthenticationController {
         // Check if user exists
         return userRepository.findByEmail(loginRequest.getEmail())
                 .map(user -> {
+                    if (Boolean.FALSE.equals(user.getEmailVerified())) {
+                        Map<String, String> error = new HashMap<>();
+                        error.put("error", "Email not verified. Please verify your email before logging in.");
+                        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
+                    }
                     // Validate password
                     if (passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
                         // Generate JWT token
@@ -83,6 +103,7 @@ public class AuthenticationController {
         user.setEmail(registerRequest.getEmail());
         user.setPhoneNumber(registerRequest.getPhoneNumber());
         user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
+        user.setEmailVerified(false);
         if (registerRequest.getAccountType() == null || registerRequest.getAccountType().isBlank()) {
             Map<String, String> error = new HashMap<>();
             error.put("error", "Account type is required. Please choose User or Owner.");
@@ -96,7 +117,19 @@ public class AuthenticationController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
         }
         user.setRole("OWNER".equals(accountType) ? UserRole.OWNER : UserRole.USER);
+        String verificationCode = generateVerificationCode();
+        user.setEmailVerificationCode(verificationCode);
+        user.setEmailVerificationExpiresAt(Instant.now().plus(Duration.ofMinutes(verificationCodeExpiryMinutes)));
+
         User savedUser = userRepository.save(user);
+
+        try {
+            emailService.sendVerificationCode(savedUser.getEmail(), verificationCode, verificationCodeExpiryMinutes);
+        } catch (IllegalStateException ex) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "Account created but verification email could not be sent. Please try again later.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
 
         if (savedUser.getRole() == UserRole.OWNER) {
             Owner owner = new Owner();
@@ -105,11 +138,99 @@ public class AuthenticationController {
         }
 
         Map<String, Object> response = new HashMap<>();
-        response.put("message", "Account created successfully. Please sign in.");
+        response.put("message", "Account created successfully. Check your email for the verification code.");
         response.put("userId", savedUser.getId());
         response.put("role", savedUser.getRole().name());
-
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    /**
+     * Resend email verification code
+     */
+    @PostMapping("/resend-verification")
+    public ResponseEntity<?> resendVerification(@Valid @RequestBody ResendVerificationRequest request) {
+        return userRepository.findByEmail(request.getEmail())
+                .map(user -> {
+                    if (Boolean.TRUE.equals(user.getEmailVerified())) {
+                        Map<String, String> response = new HashMap<>();
+                        response.put("message", "Email is already verified.");
+                        return ResponseEntity.ok(response);
+                    }
+
+                    String verificationCode = generateVerificationCode();
+                    user.setEmailVerificationCode(verificationCode);
+                    user.setEmailVerificationExpiresAt(Instant.now().plus(Duration.ofMinutes(verificationCodeExpiryMinutes)));
+                    userRepository.save(user);
+
+                    try {
+                        emailService.sendVerificationCode(user.getEmail(), verificationCode, verificationCodeExpiryMinutes);
+                    } catch (IllegalStateException ex) {
+                        Map<String, String> error = new HashMap<>();
+                        error.put("error", "Verification email could not be sent. Please try again later.");
+                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+                    }
+
+                    Map<String, String> response = new HashMap<>();
+                    response.put("message", "Verification code resent.");
+                    return ResponseEntity.ok(response);
+                })
+                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(new HashMap<String, String>() {{
+                            put("error", "User not found");
+                        }}));
+    }
+
+    /**
+     * Verify email with a 6-digit code
+     */
+    @PostMapping("/verify-email")
+    public ResponseEntity<?> verifyEmail(@Valid @RequestBody VerifyEmailRequest request) {
+        return userRepository.findByEmail(request.getEmail())
+                .map(user -> {
+                    if (Boolean.TRUE.equals(user.getEmailVerified())) {
+                        Map<String, String> response = new HashMap<>();
+                        response.put("message", "Email is already verified.");
+                        return ResponseEntity.ok(response);
+                    }
+
+                    String storedCode = user.getEmailVerificationCode();
+                    Instant expiresAt = user.getEmailVerificationExpiresAt();
+                    if (storedCode == null || expiresAt == null) {
+                        Map<String, String> error = new HashMap<>();
+                        error.put("error", "Verification code not found. Please request a new code.");
+                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+                    }
+
+                    if (Instant.now().isAfter(expiresAt)) {
+                        Map<String, String> error = new HashMap<>();
+                        error.put("error", "Verification code has expired. Please request a new code.");
+                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+                    }
+
+                    if (!storedCode.equals(request.getCode())) {
+                        Map<String, String> error = new HashMap<>();
+                        error.put("error", "Invalid verification code.");
+                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+                    }
+
+                    user.setEmailVerified(true);
+                    user.setEmailVerificationCode(null);
+                    user.setEmailVerificationExpiresAt(null);
+                    userRepository.save(user);
+
+                    Map<String, String> response = new HashMap<>();
+                    response.put("message", "Email verified successfully.");
+                    return ResponseEntity.ok(response);
+                })
+                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(new HashMap<String, String>() {{
+                            put("error", "User not found");
+                        }}));
+    }
+
+    private String generateVerificationCode() {
+        int code = secureRandom.nextInt(1_000_000);
+        return String.format("%06d", code);
     }
 
     /**
