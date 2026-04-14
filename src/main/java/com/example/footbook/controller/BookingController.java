@@ -86,6 +86,7 @@ public class BookingController {
                     throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot create booking for another user");
                 }
                 payload.setUserId(currentUserId);
+                payload.setStatus(BookingStatus.PENDING);
             }
 
             Booking booking = bookingService.createBooking(payload);

@@ -11,7 +11,9 @@ const stadiumTableBody = document.getElementById("stadiumTableBody");
 const stadiumIdInput = document.getElementById("stadiumId");
 const saveStadiumBtn = document.getElementById("saveStadiumBtn");
 const refreshUsersBtn = document.getElementById("refreshUsersBtn");
+const refreshBookingsBtn = document.getElementById("refreshBookingsBtn");
 const usersTableBody = document.getElementById("usersTableBody");
+const bookingsTableBody = document.getElementById("bookingsTableBody");
 const totalBookingsCount = document.getElementById("totalBookingsCount");
 const pendingBookingsCount = document.getElementById("pendingBookingsCount");
 const totalUsersCount = document.getElementById("totalUsersCount");
@@ -193,6 +195,119 @@ function renderUsers(users) {
             </td>
         </tr>
     `).join("");
+}
+
+function renderBookingsEmptyState(message) {
+    if (!bookingsTableBody) {
+        return;
+    }
+
+    bookingsTableBody.innerHTML = `<tr><td colspan="7" class="empty-state">${message}</td></tr>`;
+}
+
+function getBookingStatusClass(status) {
+    const normalized = String(status || "").toUpperCase();
+    if (normalized === "CONFIRMED") {
+        return "confirmed";
+    }
+    if (normalized === "PENDING") {
+        return "pending";
+    }
+    return "pending";
+}
+
+function renderBookings(bookings) {
+    if (!bookingsTableBody) {
+        return;
+    }
+
+    if (!bookings.length) {
+        renderBookingsEmptyState("No booking requests found.");
+        return;
+    }
+
+    bookingsTableBody.innerHTML = bookings.map((booking) => {
+        const status = String(booking.status || "").toUpperCase();
+        return `
+            <tr>
+                <td>#${escapeHtml(booking.id ?? "-")}</td>
+                <td>${escapeHtml(booking.userId ?? "-")}</td>
+                <td>${escapeHtml(booking.stadiumId ?? "-")}</td>
+                <td>${escapeHtml(booking.matchTitle || "-")}</td>
+                <td>${escapeHtml(booking.bookingDate || "-")}</td>
+                <td><span class="status ${getBookingStatusClass(status)}">${escapeHtml(status || "-")}</span></td>
+                <td>
+                    <div class="table-actions">
+                        ${status === "PENDING"
+                            ? `<button type="button" class="edit" data-booking-action="approve" data-booking-id="${booking.id}">Accept</button>`
+                            : `<span class="muted">No action</span>`}
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join("");
+}
+
+async function loadBookings() {
+    if (!bookingsTableBody) {
+        return;
+    }
+
+    renderBookingsEmptyState("Loading bookings...");
+
+    try {
+        const response = await fetch(BOOKINGS_API_BASE, {
+            headers: authHeaders(false)
+        });
+
+        if (response.status === 401 || response.status === 403) {
+            window.location.href = "login.html";
+            return;
+        }
+
+        if (!response.ok) {
+            renderBookingsEmptyState("Failed to load bookings.");
+            return;
+        }
+
+        const bookings = await response.json().catch(() => []);
+        const safeBookings = Array.isArray(bookings) ? bookings : [];
+        safeBookings.sort((a, b) => {
+            if (String(a.status || "").toUpperCase() !== String(b.status || "").toUpperCase()) {
+                return String(a.status || "").toUpperCase() === "PENDING" ? -1 : 1;
+            }
+            return Number(b.id || 0) - Number(a.id || 0);
+        });
+        renderBookings(safeBookings);
+    } catch (error) {
+        renderBookingsEmptyState("Unable to reach the server.");
+    }
+}
+
+async function approveBooking(bookingId) {
+    try {
+        const response = await fetch(`${BOOKINGS_API_BASE}/${bookingId}/status`, {
+            method: "PATCH",
+            headers: authHeaders(),
+            body: JSON.stringify({ status: "CONFIRMED" })
+        });
+
+        if (response.status === 401 || response.status === 403) {
+            window.location.href = "login.html";
+            return;
+        }
+
+        if (!response.ok) {
+            setStadiumStatus("Unable to approve booking.", "error");
+            return;
+        }
+
+        setStadiumStatus(`Booking #${bookingId} approved.`, "success");
+        await loadBookings();
+        await loadDashboardStats();
+    } catch (error) {
+        setStadiumStatus("Unable to approve booking right now.", "error");
+    }
 }
 
 function setDashboardStat(element, value) {
@@ -403,12 +518,14 @@ async function handleTableClick(event) {
     const button = event.target.closest("button[data-action]");
     if (!button) {
         const userButton = event.target.closest("button[data-user-action]");
-        if (!userButton) {
+        if (userButton && userButton.dataset.userAction === "delete") {
+            await deleteUser(userButton.dataset.userId);
             return;
         }
 
-        if (userButton.dataset.userAction === "delete") {
-            await deleteUser(userButton.dataset.userId);
+        const bookingButton = event.target.closest("button[data-booking-action]");
+        if (bookingButton && bookingButton.dataset.bookingAction === "approve") {
+            await approveBooking(bookingButton.dataset.bookingId);
         }
         return;
     }
@@ -461,6 +578,10 @@ if (refreshUsersBtn) {
     refreshUsersBtn.addEventListener("click", loadUsers);
 }
 
+if (refreshBookingsBtn) {
+    refreshBookingsBtn.addEventListener("click", loadBookings);
+}
+
 if (cancelStadiumBtn) {
     cancelStadiumBtn.addEventListener("click", closeStadiumForm);
 }
@@ -479,4 +600,5 @@ if (usersTableBody) {
 
 loadStadiums();
 loadUsers();
+loadBookings();
 loadDashboardStats();

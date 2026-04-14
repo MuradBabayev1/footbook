@@ -168,41 +168,37 @@
                 </div>
             </section>
 
-            <section class="table-wrap" id="recent-bookings">
-                <table aria-label="Recent bookings">
-                    <thead>
-                        <tr>
-                            <th>Booking ID</th>
-                            <th>User</th>
-                            <th>Stadium</th>
-                            <th>Date</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>#BK-4021</td>
-                            <td>Amir Khan</td>
-                            <td>City Arena A</td>
-                            <td>2026-04-08</td>
-                            <td><span class="status confirmed">Confirmed</span></td>
-                        </tr>
-                        <tr>
-                            <td>#BK-4022</td>
-                            <td>Leah Smith</td>
-                            <td>North Field 2</td>
-                            <td>2026-04-08</td>
-                            <td><span class="status pending">Pending</span></td>
-                        </tr>
-                        <tr>
-                            <td>#BK-4023</td>
-                            <td>Rafiul Hasan</td>
-                            <td>East Dome</td>
-                            <td>2026-04-09</td>
-                            <td><span class="status confirmed">Confirmed</span></td>
-                        </tr>
-                    </tbody>
-                </table>
+            <section class="manager card" id="recent-bookings">
+                <div class="manager-head">
+                    <div>
+                        <h2>Booking Requests</h2>
+                        <p class="muted">Approve pending bookings submitted by users.</p>
+                    </div>
+                    <div class="actions">
+                        <button class="btn secondary" id="refreshBookingsBtn" type="button">Refresh Bookings</button>
+                    </div>
+                </div>
+
+                <div class="table-wrap manager-table">
+                    <table aria-label="Booking requests">
+                        <thead>
+                            <tr>
+                                <th>Booking ID</th>
+                                <th>User ID</th>
+                                <th>Stadium ID</th>
+                                <th>Match</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bookingsTableBody">
+                            <tr>
+                                <td colspan="7" class="empty-state">Loading bookings...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </section>
 
             <section class="actions">
@@ -210,6 +206,6 @@
             </section>
         </main>
     </div>
-    <script src="js/admin-panel.js?v=20260411-2"></script>
+    <script src="js/admin-panel.js?v=20260414-1"></script>
 </body>
 </html>
