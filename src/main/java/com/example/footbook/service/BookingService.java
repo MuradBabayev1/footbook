@@ -105,6 +105,20 @@ public class BookingService {
         Stadium stadium = stadiumRepository.findById(requestDto.getStadiumId())
                 .orElseThrow(() -> new IllegalArgumentException("Stadium not found with id: " + requestDto.getStadiumId()));
 
+        if (!Boolean.TRUE.equals(stadium.getAvailable())) {
+            throw new IllegalArgumentException("Stadium is not available");
+        }
+
+        boolean hasOverlap = bookingRepository.existsOverlappingBooking(
+                stadium.getId(),
+                requestDto.getBookingDate(),
+                requestDto.getStartTime(),
+                requestDto.getEndTime()
+        );
+        if (hasOverlap) {
+            throw new IllegalArgumentException("Stadium is already booked for the selected time slot");
+        }
+
         Booking booking = new Booking();
         booking.setUser(user);
         booking.setStadium(stadium);

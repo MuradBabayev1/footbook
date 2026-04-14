@@ -79,28 +79,24 @@ public class BookingController {
 
     @PostMapping
     public ResponseEntity<?> createBooking(@RequestBody BookingRequestDto payload) {
-        try {
-            if (!isAdmin()) {
-                Long currentUserId = getCurrentUserId();
-                if (payload.getUserId() != null && !payload.getUserId().equals(currentUserId)) {
-                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot create booking for another user");
-                }
-                payload.setUserId(currentUserId);
-                payload.setStatus(BookingStatus.PENDING);
+        if (!isAdmin()) {
+            Long currentUserId = getCurrentUserId();
+            if (payload.getUserId() != null && !payload.getUserId().equals(currentUserId)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot create booking for another user");
             }
-
-            Booking booking = bookingService.createBooking(payload);
-            return ResponseEntity.status(HttpStatus.CREATED).body(BookingResponseDto.fromEntity(booking));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            payload.setUserId(currentUserId);
+            payload.setStatus(BookingStatus.PENDING);
         }
+
+        Booking booking = bookingService.createBooking(payload);
+        return ResponseEntity.status(HttpStatus.CREATED).body(BookingResponseDto.fromEntity(booking));
     }
 
     @PatchMapping("/{id}/status")
     public ResponseEntity<?> updateBookingStatus(@PathVariable Long id,
                                                  @RequestBody BookingStatusUpdateRequestDto payload) {
         if (payload.getStatus() == null) {
-            return ResponseEntity.badRequest().body("status is required");
+            throw new IllegalArgumentException("status is required");
         }
 
         return bookingService.getBookingById(id)

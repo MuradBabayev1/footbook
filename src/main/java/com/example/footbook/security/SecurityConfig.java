@@ -84,12 +84,12 @@ public class SecurityConfig {
                     .authenticationEntryPoint(new JwtAuthenticationEntryPoint()))
             .sessionManagement(sessionManagement -> sessionManagement
                     .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(authz -> authz
+                .authorizeHttpRequests(authz -> authz
                     .requestMatchers("/", "/index.html", "/frontend", "/frontend/", "/frontend/**", "/favicon.ico", "/error").permitAll()
                     .requestMatchers("/api/auth/**").permitAll()
+                    .requestMatchers("/api/stadiums/owner/**").hasRole("OWNER")
                     .requestMatchers(HttpMethod.GET, "/api/stadiums/**").permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/stadiums/**").hasRole("OWNER")
-                    .requestMatchers("/api/stadiums/owner/**").hasRole("OWNER")
                     .requestMatchers(HttpMethod.PUT, "/api/stadiums/**").hasRole("ADMIN")
                     .requestMatchers(HttpMethod.DELETE, "/api/stadiums/**").hasRole("ADMIN")
                     .requestMatchers("/api/owners/**").hasRole("ADMIN")

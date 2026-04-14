@@ -80,35 +80,27 @@ public class StadiumController {
 
     @PostMapping
     public ResponseEntity<?> createStadium(@RequestBody StadiumRequestDto payload, Authentication authentication) {
-        try {
-            Owner owner = resolveOwner(authentication);
-            if (owner == null) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Only owners can add stadiums");
-            }
-
-            Stadium stadium = stadiumService.createStadium(payload, owner);
-            return ResponseEntity.status(HttpStatus.CREATED).body(StadiumResponseDto.fromEntity(stadium));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+        Owner owner = resolveOwner(authentication);
+        if (owner == null) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Only owners can add stadiums");
         }
+
+        Stadium stadium = stadiumService.createStadium(payload, owner);
+        return ResponseEntity.status(HttpStatus.CREATED).body(StadiumResponseDto.fromEntity(stadium));
     }
 
     @PutMapping("/owner/{id}")
     public ResponseEntity<?> updateOwnerStadium(@PathVariable Long id,
                                                 @RequestBody StadiumRequestDto payload,
                                                 Authentication authentication) {
-        try {
-            Owner owner = resolveOwner(authentication);
-            if (owner == null) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Only owners can update stadiums");
-            }
-
-            return stadiumService.updateOwnerStadium(owner.getId(), id, payload)
-                    .map(stadium -> ResponseEntity.ok(StadiumResponseDto.fromEntity(stadium)))
-                    .orElse(ResponseEntity.notFound().build());
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+        Owner owner = resolveOwner(authentication);
+        if (owner == null) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Only owners can update stadiums");
         }
+
+        return stadiumService.updateOwnerStadium(owner.getId(), id, payload)
+                .map(stadium -> ResponseEntity.ok(StadiumResponseDto.fromEntity(stadium)))
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/owner/{id}")
@@ -126,13 +118,9 @@ public class StadiumController {
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updateStadium(@PathVariable Long id, @RequestBody StadiumRequestDto payload) {
-        try {
-            return stadiumService.updateStadium(id, payload)
-                    .map(stadium -> ResponseEntity.ok(StadiumResponseDto.fromEntity(stadium)))
-                    .orElse(ResponseEntity.notFound().build());
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        return stadiumService.updateStadium(id, payload)
+                .map(stadium -> ResponseEntity.ok(StadiumResponseDto.fromEntity(stadium)))
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")

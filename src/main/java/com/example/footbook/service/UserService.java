@@ -3,6 +3,8 @@ package com.example.footbook.service;
 import com.example.footbook.dto.UserRequestDto;
 import com.example.footbook.entity.User;
 import com.example.footbook.repository.BookingRepository;
+import com.example.footbook.repository.OwnerRepository;
+import com.example.footbook.repository.StadiumRepository;
 import com.example.footbook.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,11 +19,19 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
+    private final OwnerRepository ownerRepository;
+    private final StadiumRepository stadiumRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository, BookingRepository bookingRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository,
+                       BookingRepository bookingRepository,
+                       OwnerRepository ownerRepository,
+                       StadiumRepository stadiumRepository,
+                       PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.bookingRepository = bookingRepository;
+        this.ownerRepository = ownerRepository;
+        this.stadiumRepository = stadiumRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -87,7 +97,14 @@ public class UserService {
 
     public boolean deleteUser(Long id) {
         if (userRepository.existsById(id)) {
-            // Remove dependent bookings first to satisfy FK constraints.
+            ownerRepository.findByUserId(id).ifPresent(owner -> {
+                var ownerStadiums = stadiumRepository.findByOwnerId(owner.getId());
+                for (var stadium : ownerStadiums) {
+                    bookingRepository.deleteByStadiumId(stadium.getId());
+                }
+                stadiumRepository.deleteAll(ownerStadiums);
+                ownerRepository.delete(owner);
+            });
             bookingRepository.deleteByUserId(id);
             userRepository.deleteById(id);
             return true;
