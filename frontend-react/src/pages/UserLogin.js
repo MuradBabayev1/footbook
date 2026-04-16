@@ -182,7 +182,7 @@ function UserLogin() {
         </form>
 
         <p className="meta-links">
-          New user? <a href="/frontend/user-signup.html">Create account</a>
+          New user? <a href="/user-signup">Create account</a>
           <span className="divider">|</span>
           Are you admin? <a href="/frontend/login.html">Admin login</a>
         </p>
