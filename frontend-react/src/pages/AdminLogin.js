@@ -1,46 +1,43 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import "../styles/user-login.css";
+import "../styles/admin-login.css";
 
 const API_BASE = "/api/auth";
-const ownerDashboardPath = "/frontend/owner-dashboard.html";
-const userDashboardPath = "/frontend/user-dashboard.html";
+const adminPanelPath = "/frontend/admin-panel.html";
 
-function UserLogin() {
-  const navigate = useNavigate();
+function AdminLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(false);
   const [status, setStatus] = useState({ message: "", type: "" });
 
   useEffect(() => {
-    document.title = "Footbook | User Login";
+    document.title = "Footbook | Login";
 
     const existingToken =
       localStorage.getItem("footbook.token") ||
       sessionStorage.getItem("footbook.token");
-    const existingUserRaw =
+    const rawExistingUser =
       localStorage.getItem("footbook.user") ||
       sessionStorage.getItem("footbook.user");
 
-    if (existingToken && existingUserRaw) {
+    if (existingToken && rawExistingUser) {
       try {
-        const existingUser = JSON.parse(existingUserRaw);
-        const existingRole = String(existingUser.role || "USER").toUpperCase();
-        window.location.href =
-          existingRole === "OWNER" ? ownerDashboardPath : userDashboardPath;
+        const existingUser = JSON.parse(rawExistingUser);
+        if (String(existingUser.role || "").toUpperCase() === "ADMIN") {
+          window.location.href = adminPanelPath;
+        }
       } catch (error) {
-        window.location.href = userDashboardPath;
+        // Ignore invalid session payload and continue on login page.
       }
     }
-  }, [navigate]);
+  }, []);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     setStatus({ message: "", type: "" });
 
     if (!email || !password) {
-      setStatus({ message: "Please enter your email and password.", type: "error" });
+      setStatus({ message: "Please fill in email and password.", type: "error" });
       return;
     }
 
@@ -70,9 +67,18 @@ function UserLogin() {
         return;
       }
 
+      const role = String(data.role || "USER").toUpperCase();
+      if (role !== "ADMIN") {
+        localStorage.removeItem("footbook.token");
+        localStorage.removeItem("footbook.user");
+        sessionStorage.removeItem("footbook.token");
+        sessionStorage.removeItem("footbook.user");
+        setStatus({ message: "Admin account required for this panel.", type: "error" });
+        return;
+      }
+
       const storage = remember ? localStorage : sessionStorage;
       const fallbackStorage = remember ? sessionStorage : localStorage;
-      const role = String(data.role || "USER").toUpperCase();
 
       fallbackStorage.removeItem("footbook.token");
       fallbackStorage.removeItem("footbook.user");
@@ -89,48 +95,40 @@ function UserLogin() {
         })
       );
 
-      setStatus({ message: "Login successful. Redirecting...", type: "ok" });
+      setStatus({ message: "Login successful. Redirecting to admin panel...", type: "ok" });
 
       window.setTimeout(() => {
-        window.location.href = role === "OWNER" ? ownerDashboardPath : userDashboardPath;
-      }, 400);
+        window.location.href = adminPanelPath;
+      }, 450);
     } catch (error) {
-      setStatus({ message: "Server unreachable. Please try again.", type: "error" });
+      setStatus({
+        message: "Unable to reach server. Check backend and try again.",
+        type: "error"
+      });
     }
   };
 
   return (
-    <main className="auth-layout">
-      <section className="story-pane">
-        <p className="eyebrow">Footbook Player Access</p>
-        <h1>Welcome back to match mode.</h1>
-        <p className="lead">
-          Jump straight into stadium discovery, secure your preferred slot, and keep
-          every booking in one sharp dashboard.
-        </p>
-
-        <div className="story-cards">
-          <article>
-            <h3>Instant Availability</h3>
-            <p>Scan open stadiums and reserve before slots disappear.</p>
-          </article>
-          <article>
-            <h3>Fast Booking Flow</h3>
-            <p>Create and track matches in a clean, focused workflow.</p>
-          </article>
-          <article>
-            <h3>One Account</h3>
-            <p>Sign in once, then manage your full playing schedule.</p>
-          </article>
+    <div className="shell">
+      <section className="hero">
+        <div className="eyebrow">
+          <span className="dot"></span> Footbook Access
         </div>
+        <h1>Welcome back to your booking command center.</h1>
+        <p>
+          Sign in to manage bookings, review stadium availability, and track daily
+          operations in one place.
+        </p>
+        <ul>
+          <li>Fast admin and staff login flow</li>
+          <li>Role-based backend integration ready</li>
+          <li>Responsive layout for desktop and mobile</li>
+        </ul>
       </section>
 
-      <section className="form-pane" aria-label="User login form">
-        <div className="form-head">
-          <span className="tag">Sign in</span>
-          <h2>User Login</h2>
-          <p>Use your registered email and password to continue.</p>
-        </div>
+      <section className="panel">
+        <h2>Login</h2>
+        <p>Use your account credentials to continue.</p>
 
         <form onSubmit={handleSubmit} noValidate>
           <div className="field">
@@ -139,7 +137,7 @@ function UserLogin() {
               id="email"
               name="email"
               type="email"
-              placeholder="player@footbook.com"
+              placeholder="admin@footbook.com"
               required
               value={email}
               onChange={(event) => setEmail(event.target.value)}
@@ -161,34 +159,30 @@ function UserLogin() {
           </div>
 
           <div className="row">
-            <label className="checkbox">
+            <label className="check">
               <input
                 type="checkbox"
                 name="remember"
                 checked={remember}
                 onChange={(event) => setRemember(event.target.checked)}
               />
-              Keep me signed in
+              Remember me
             </label>
-            <a href="#" className="link">
-              Forgot password?
-            </a>
+            <a href="#" className="link">Forgot password?</a>
           </div>
 
-          <button type="submit" className="btn">Login</button>
+          <button type="submit" className="btn">Sign in</button>
           <div className={`status ${status.type || ""}`} aria-live="polite">
             {status.message}
           </div>
         </form>
 
-        <p className="meta-links">
-          New user? <a href="/user-signup">Create account</a>
-          <span className="divider">|</span>
-          Are you admin? <a href="/admin-login">Admin login</a>
-        </p>
+        <div className="quick-links">
+          Need admin tools? <a href={adminPanelPath} className="link">Open admin panel</a>
+        </div>
       </section>
-    </main>
+    </div>
   );
 }
 
-export default UserLogin;
+export default AdminLogin;
