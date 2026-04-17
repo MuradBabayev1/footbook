@@ -68,8 +68,8 @@ public class AuthenticationController {
                     }
                     // Validate password
                     if (passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
-                        // Generate JWT token
-                        String token = jwtTokenProvider.generateToken(user.getId(), user.getEmail());
+                        // Generate JWT token with role information
+                        String token = jwtTokenProvider.generateToken(user);
                         LoginResponse response = new LoginResponse(token, user.getId(), user.getEmail(), user.getFullName());
                         response.setRole(user.getRole() != null ? user.getRole().name() : "USER");
                         return ResponseEntity.ok(response);

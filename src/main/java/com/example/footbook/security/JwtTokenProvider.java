@@ -1,5 +1,6 @@
 package com.example.footbook.security;
 
+import com.example.footbook.entity.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
@@ -31,6 +32,28 @@ public class JwtTokenProvider {
     }
 
     /**
+     * Generate JWT token for a user with role information
+     */
+    public String generateToken(User user) {
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + jwtExpiration);
+
+        SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
+
+        String roleString = user.getRole() != null ? "ROLE_" + user.getRole().name() : "ROLE_USER";
+
+        return Jwts.builder()
+                .claim("roles", "ROLE_USER")
+                .subject(String.valueOf(user.getId()))
+                .claim("email", user.getEmail())
+                .claim("roles", roleString)
+                .issuedAt(now)
+                .expiration(expiryDate)
+                .signWith(key)
+                .compact();
+    }
+
+    /**
      * Generate JWT token for a user
      */
     public String generateToken(Long userId, String email) {
@@ -50,7 +73,20 @@ public class JwtTokenProvider {
 
     /**
      * Get user ID from JWT token
+     
+
+    /**
+     * Get roles from JWT token
      */
+    public String getRolesFromToken(String token) {
+        SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
+        Claims claims = Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+        return claims.get("roles", String.class);
+    }*/
     public Long getUserIdFromToken(String token) {
         SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
         Claims claims = Jwts.parser()

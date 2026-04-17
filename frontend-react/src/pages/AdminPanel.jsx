@@ -334,7 +334,8 @@ function AdminPanel() {
       }
 
       if (!response.ok) {
-        setStatusMessage("Unable to delete user.", "error");
+        const errorMessage = response.data?.error || "Unable to delete user.";
+        setStatusMessage(errorMessage, "error");
         return;
       }
 

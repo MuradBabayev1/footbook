@@ -6,16 +6,22 @@ import com.example.footbook.repository.BookingRepository;
 import com.example.footbook.repository.OwnerRepository;
 import com.example.footbook.repository.StadiumRepository;
 import com.example.footbook.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
 public class UserService {
+
+    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
@@ -95,19 +101,45 @@ public class UserService {
         });
     }
 
+    @Transactional(rollbackFor = {DataIntegrityViolationException.class, Exception.class})
     public boolean deleteUser(Long id) {
-        if (userRepository.existsById(id)) {
+        try {
+            logger.debug("Starting deletion for user ID: {}", id);
+            
             ownerRepository.findByUserId(id).ifPresent(owner -> {
+                logger.debug("Found owner with ID: {} for user ID: {}", owner.getId(), id);
+                
                 var ownerStadiums = stadiumRepository.findByOwnerId(owner.getId());
-                for (var stadium : ownerStadiums) {
-                    bookingRepository.deleteByStadiumId(stadium.getId());
+                logger.debug("Found {} stadiums for owner ID: {}", ownerStadiums.size(), owner.getId());
+                
+                if (!ownerStadiums.isEmpty()) {
+                    List<Long> stadiumIds = ownerStadiums.stream()
+                            .map(s -> s.getId())
+                            .collect(Collectors.toList());
+                    
+                    long deletedBookings = bookingRepository.deleteByStadiumIdIn(stadiumIds);
+                    logger.debug("Deleted {} bookings for stadiums: {}", deletedBookings, stadiumIds);
                 }
+                
                 stadiumRepository.deleteAll(ownerStadiums);
+                logger.debug("Deleted {} stadiums for owner ID: {}", ownerStadiums.size(), owner.getId());
+                
                 ownerRepository.delete(owner);
+                logger.debug("Deleted owner with ID: {}", owner.getId());
             });
-            bookingRepository.deleteByUserId(id);
+            
+            long deletedUserBookings = bookingRepository.deleteByUserId(id);
+            logger.debug("Deleted {} bookings for user ID: {}", deletedUserBookings, id);
+            
             userRepository.deleteById(id);
+            logger.info("Successfully deleted user with ID: {}", id);
+            
             return true;
+        } catch (DataIntegrityViolationException e) {
+            logger.error("Data integrity violation while deleting user ID: {}. Error: {}", id, e.getMessage(), e);
+            throw new RuntimeException("Cannot delete user due to data integrity constraints", e);
+        } catch (Exception e) {
+         
         }
         return false;
     }

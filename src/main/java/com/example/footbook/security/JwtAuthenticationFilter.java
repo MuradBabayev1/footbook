@@ -2,6 +2,7 @@ package com.example.footbook.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -13,7 +14,9 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
@@ -31,9 +34,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
                 Long userId = tokenProvider.getUserIdFromToken(jwt);
-                var userDetails = userDetailsService.loadUserById(userId);
+                String rolesFromToken = tokenProvider.getRolesFromToken(jwt);
 
-                Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities();
+                // Extract roles from JWT and build authorities
+                Collection<GrantedAuthority> authorities = buildAuthoritiesFromRoles(rolesFromToken);
+
+                var userDetails = userDetailsService.loadUserById(userId);
 
                 UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
@@ -46,6 +52,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    /**
+     * Build authorities from roles string extracted from JWT
+     */
+    private Collection<GrantedAuthority> buildAuthoritiesFromRoles(String rolesString) {
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        if (StringUtils.hasText(rolesString)) {
+            // Handle single role as string (e.g., "ROLE_ADMIN")
+            authorities.add(new SimpleGrantedAuthority(rolesString));
+        } else {
+            // Default to USER role if no role is found
+            authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+        }
+        return authorities;
     }
 
     /**

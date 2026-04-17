@@ -1,5 +1,6 @@
 package com.example.footbook.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -37,7 +38,7 @@ public class Stadium {
     @Column(name = "owner_id", insertable = false, updatable = false)
     private Long ownerId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     @JoinColumn(name = "owner_id", foreignKey = @ForeignKey(name = "fk_stadium_owner"))
     private Owner owner;
 
