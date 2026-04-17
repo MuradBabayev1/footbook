@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "../styles/home.css";
+import { clearStoredSession, readStoredUser, getAuthToken } from "../services/session";
 
 const DEFAULT_PRIMARY = {
   text: "Start Booking",
@@ -12,33 +13,18 @@ const DEFAULT_SECONDARY = {
   to: "/user-login"
 };
 
-function clearStoredSession() {
-  localStorage.removeItem("footbook.token");
-  localStorage.removeItem("footbook.user");
-  sessionStorage.removeItem("footbook.token");
-  sessionStorage.removeItem("footbook.user");
-}
-
 function readStoredSession() {
-  const token =
-    localStorage.getItem("footbook.token") ||
-    sessionStorage.getItem("footbook.token");
-  const rawUser =
-    localStorage.getItem("footbook.user") ||
-    sessionStorage.getItem("footbook.user");
+  const token = getAuthToken();
+  const user = readStoredUser();
 
-  if (!token || !rawUser) {
+  if (!token || !user) {
     return null;
   }
 
-  try {
-    return {
-      token,
-      user: JSON.parse(rawUser)
-    };
-  } catch (error) {
-    return null;
-  }
+  return {
+    token,
+    user
+  };
 }
 
 function Home() {

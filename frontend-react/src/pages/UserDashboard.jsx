@@ -1,36 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/user-dashboard.css";
-
-function clearStoredSession() {
-  localStorage.removeItem("footbook.token");
-  localStorage.removeItem("footbook.user");
-  sessionStorage.removeItem("footbook.token");
-  sessionStorage.removeItem("footbook.user");
-}
-
-function readStoredUser() {
-  const rawUser =
-    localStorage.getItem("footbook.user") ||
-    sessionStorage.getItem("footbook.user");
-
-  if (!rawUser) {
-    return null;
-  }
-
-  try {
-    return JSON.parse(rawUser);
-  } catch (error) {
-    return null;
-  }
-}
-
-function getAuthToken() {
-  return (
-    localStorage.getItem("footbook.token") ||
-    sessionStorage.getItem("footbook.token")
-  );
-}
+import { clearStoredSession, readStoredUser, getAuthToken } from "../services/session";
 
 function formatTimeRange(startTime, endTime) {
   if (!startTime && !endTime) {

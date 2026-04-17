@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/owner-dashboard.css";
+import { clearStoredSession, readStoredUser, getAuthToken } from "../services/session";
 
 const emptyForm = {
   id: "",
@@ -10,36 +11,6 @@ const emptyForm = {
   capacity: "",
   available: "true"
 };
-
-function clearStoredSession() {
-  localStorage.removeItem("footbook.token");
-  localStorage.removeItem("footbook.user");
-  sessionStorage.removeItem("footbook.token");
-  sessionStorage.removeItem("footbook.user");
-}
-
-function readStoredUser() {
-  const rawUser =
-    localStorage.getItem("footbook.user") ||
-    sessionStorage.getItem("footbook.user");
-
-  if (!rawUser) {
-    return null;
-  }
-
-  try {
-    return JSON.parse(rawUser);
-  } catch (error) {
-    return null;
-  }
-}
-
-function getAuthToken() {
-  return (
-    localStorage.getItem("footbook.token") ||
-    sessionStorage.getItem("footbook.token")
-  );
-}
 
 function OwnerDashboard() {
   const navigate = useNavigate();
