@@ -122,6 +122,68 @@
 	<build>
 		<plugins>
 			<plugin>
+				<groupId>com.github.eirslett</groupId>
+				<artifactId>frontend-maven-plugin</artifactId>
+				<version>1.15.0</version>
+				<configuration>
+					<workingDirectory>frontend-react</workingDirectory>
+				</configuration>
+				<executions>
+					<execution>
+						<id>install-node-and-npm</id>
+						<goals>
+							<goal>install-node-and-npm</goal>
+						</goals>
+						<configuration>
+							<nodeVersion>v20.12.2</nodeVersion>
+							<npmVersion>10.5.0</npmVersion>
+						</configuration>
+					</execution>
+					<execution>
+						<id>npm-install</id>
+						<goals>
+							<goal>npm</goal>
+						</goals>
+						<configuration>
+							<arguments>install</arguments>
+						</configuration>
+					</execution>
+					<execution>
+						<id>npm-build</id>
+						<goals>
+							<goal>npm</goal>
+						</goals>
+						<configuration>
+							<arguments>run build</arguments>
+						</configuration>
+						<phase>prepare-package</phase>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>3.3.1</version>
+				<executions>
+					<execution>
+						<id>copy-react-build</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.basedir}/src/main/resources/static</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${project.basedir}/frontend-react/build</directory>
+								</resource>
+							</resources>
+							<overwrite>true</overwrite>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
@@ -170,6 +232,35 @@
 				</executions>
 			</plugin>
 		</plugins>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>com.github.eirslett</groupId>
+										<artifactId>frontend-maven-plugin</artifactId>
+										<versionRange>[1.15.0,)</versionRange>
+										<goals>
+											<goal>install-node-and-npm</goal>
+											<goal>npm</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore />
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 	</build>
 
 </project>

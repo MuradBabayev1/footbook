@@ -22,6 +22,7 @@ Footbook is a Spring Boot application for football stadium booking with role-bas
 
 - Java 21+
 - Maven (or use `./mvnw`)
+- Node.js 18+
 - MySQL 8+
 - Redis 7+
 
@@ -62,12 +63,17 @@ CREATE DATABASE footbook;
 cd frontend-react
 npm install
 npm run build
+rm -rf ../src/main/resources/static/*
+cp -R build/* ../src/main/resources/static/
 ```
 
 5. Open app:
 
 - Backend base URL: `http://localhost:8080`
-- React app: `http://localhost:8080/`
+- React app: `http://localhost:8081/`
+
+Port can be overridden with `SERVER_PORT`.
+If the configured port is already in use, the app now automatically falls back to a random free port and prints it in startup logs.
 
 ## Build and Test
 
