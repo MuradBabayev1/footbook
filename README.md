@@ -51,29 +51,87 @@ CREATE DATABASE footbook;
 
 2. Start MySQL and Redis.
 
-3. Run application:
+3. Install frontend dependencies:
+
+```bash
+cd frontend-react
+npm install
+```
+
+4. Development mode (run frontend and backend together):
+
+Run only Spring Boot (frontend auto-starts):
 
 ```bash
 ./mvnw spring-boot:run
 ```
 
-4. Build the React frontend and copy it into Spring Boot static resources:
+By default, Spring Boot now auto-starts the React dev server on port `3000` when `footbook.frontend.auto-start=true`.
+Disable with `FRONTEND_AUTO_START=false` when needed.
+
+Single command (recommended):
+
+```bash
+./run-dev.sh
+```
+
+Notes:
+
+- `run-dev.sh` requires backend port `8080` and frontend port `3000` to be free.
+- If either port is already in use, the script exits with a clear message so proxy/API calls do not run in a broken state.
+- If backend is already running (for example from IDE), use:
+
+```bash
+USE_EXISTING_BACKEND=1 ./run-dev.sh
+```
+
+Alternative from project root:
+
+```bash
+npm run dev
+```
+
+Alternative from `frontend-react`:
+
+```bash
+npm run dev:full
+```
+
+Manual mode (two terminals):
+
+Terminal 1 (backend):
+
+```bash
+./mvnw spring-boot:run
+```
+
+Terminal 2 (frontend):
 
 ```bash
 cd frontend-react
-npm install
-npm run build
-rm -rf ../src/main/resources/static/*
-cp -R build/* ../src/main/resources/static/
+npm start
 ```
 
-5. Open app:
+The React dev server runs on `http://localhost:3000` and proxies `/api/*` calls to `http://localhost:8080` using `frontend-react/package.json`.
+
+5. Production-style mode (Spring serves React build):
+
+```bash
+cd frontend-react
+npm run build
+find ../src/main/resources/static -mindepth 1 -delete
+cp -R build/* ../src/main/resources/static/
+cd ..
+./mvnw spring-boot:run
+```
+
+Open app:
 
 - Backend base URL: `http://localhost:8080`
-- React app: `http://localhost:8081/`
+- React app (served by Spring): `http://localhost:8080/`
 
 Port can be overridden with `SERVER_PORT`.
-If the configured port is already in use, the app now automatically falls back to a random free port and prints it in startup logs.
+If the configured port is already in use, the app falls back to a random free port and prints it in startup logs.
 
 ## Build and Test
 

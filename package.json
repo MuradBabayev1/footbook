@@ -1,0 +1,9 @@
+{
+  "name": "footbook-dev-runner",
+  "private": true,
+  "scripts": {
+    "dev": "bash ./run-dev.sh",
+    "dev:backend": "./mvnw spring-boot:run",
+    "dev:frontend": "npm --prefix frontend-react start"
+  }
+}
