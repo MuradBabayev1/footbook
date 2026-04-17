@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "../styles/user-signup.css";
 
 const API_BASE = "/api/auth";
 const loginPath = "/user-login";
-const legacyHomePath = "/frontend/index.html";
+const legacyHomePath = "/";
 
 function UserSignup() {
+  const navigate = useNavigate();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -21,9 +23,9 @@ function UserSignup() {
       localStorage.getItem("footbook.token") ||
       sessionStorage.getItem("footbook.token");
     if (existingToken) {
-      window.location.href = legacyHomePath;
+      navigate(legacyHomePath, { replace: true });
     }
-  }, []);
+  }, [navigate]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -84,7 +86,7 @@ function UserSignup() {
       });
 
       window.setTimeout(() => {
-        window.location.href = loginPath;
+        navigate(loginPath);
       }, 1200);
     } catch (error) {
       setStatus({ message: "Unable to reach server. Please try again.", type: "error" });

@@ -85,7 +85,18 @@ public class SecurityConfig {
             .sessionManagement(sessionManagement -> sessionManagement
                     .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authz -> authz
-                    .requestMatchers("/", "/index.html", "/frontend", "/frontend/", "/frontend/**", "/favicon.ico", "/error").permitAll()
+                    .requestMatchers(
+                        "/",
+                        "/index.html",
+                        "/static/**",
+                        "/asset-manifest.json",
+                        "/manifest.json",
+                        "/robots.txt",
+                        "/logo192.png",
+                        "/logo512.png",
+                        "/favicon.ico",
+                        "/error"
+                    ).permitAll()
                     .requestMatchers("/api/auth/**").permitAll()
                     .requestMatchers("/api/stadiums/owner/**").hasRole("OWNER")
                     .requestMatchers(HttpMethod.GET, "/api/stadiums/**").permitAll()

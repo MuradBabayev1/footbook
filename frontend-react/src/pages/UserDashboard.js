@@ -46,7 +46,7 @@ function UserDashboard() {
   const [stadiums, setStadiums] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [dashboardStatus, setDashboardStatus] = useState("Ready");
+  const [dashboardStatus, setDashboardStatus] = useState({ message: "Ready", type: "" });
   const [bookingStatus, setBookingStatus] = useState({ message: "", type: "" });
   const [bookingForm, setBookingForm] = useState({
     stadiumId: "",
@@ -117,7 +117,7 @@ function UserDashboard() {
   }, [searchQuery]);
 
   const loadStadiums = useCallback(async () => {
-    setDashboardStatus("Loading stadiums...");
+    setDashboardStatus({ message: "Loading stadiums...", type: "" });
 
     let loadedStadiums = [];
     try {
@@ -157,12 +157,12 @@ function UserDashboard() {
           );
         }
       } catch (error) {
-        setDashboardStatus("Unable to load stadiums.", "error");
+        setDashboardStatus({ message: "Unable to load stadiums.", type: "error" });
       }
     }
 
     setStadiums(loadedStadiums);
-    setDashboardStatus("Dashboard ready.");
+    setDashboardStatus({ message: "Dashboard ready.", type: "" });
   }, [authHeaders, navigate]);
 
   const loadBookings = useCallback(async () => {
@@ -199,6 +199,19 @@ function UserDashboard() {
     loadStadiums();
     loadBookings();
   }, [loadBookings, loadStadiums, ready]);
+
+  useEffect(() => {
+    if (!stadiums.length) {
+      return;
+    }
+
+    setBookingForm((prev) => {
+      if (prev.stadiumId) {
+        return prev;
+      }
+      return { ...prev, stadiumId: String(stadiums[0].id) };
+    });
+  }, [stadiums]);
 
   const handleBookingStatus = (message, type = "") => {
     setBookingStatus({ message, type });
@@ -393,8 +406,8 @@ function UserDashboard() {
           </article>
           <article className="metric-card">
             <p>System Status</p>
-            <strong id="dashboardStatus" className={dashboardStatus === "Dashboard ready." ? "" : "error"}>
-              {dashboardStatus}
+            <strong id="dashboardStatus" className={dashboardStatus.type || ""}>
+              {dashboardStatus.message}
             </strong>
           </article>
         </section>

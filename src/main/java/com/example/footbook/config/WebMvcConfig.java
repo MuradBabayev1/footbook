@@ -2,18 +2,11 @@ package com.example.footbook.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
-import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.http.MediaType;
 
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
-
-    @Override
-    public void addViewControllers(ViewControllerRegistry registry) {
-        registry.addRedirectViewController("/frontend", "/frontend/index.html");
-        registry.addRedirectViewController("/frontend/", "/frontend/index.html");
-    }
 
     /**
      * Configure content negotiation for API responses

@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "../styles/admin-login.css";
 
 const API_BASE = "/api/auth";
-const adminPanelPath = "/frontend/admin-panel.html";
+const adminPanelPath = "/admin-panel";
 
 function AdminLogin() {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(false);
@@ -24,13 +26,13 @@ function AdminLogin() {
       try {
         const existingUser = JSON.parse(rawExistingUser);
         if (String(existingUser.role || "").toUpperCase() === "ADMIN") {
-          window.location.href = adminPanelPath;
+          navigate(adminPanelPath, { replace: true });
         }
       } catch (error) {
         // Ignore invalid session payload and continue on login page.
       }
     }
-  }, []);
+  }, [navigate]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -98,7 +100,7 @@ function AdminLogin() {
       setStatus({ message: "Login successful. Redirecting to admin panel...", type: "ok" });
 
       window.setTimeout(() => {
-        window.location.href = adminPanelPath;
+        navigate(adminPanelPath);
       }, 450);
     } catch (error) {
       setStatus({

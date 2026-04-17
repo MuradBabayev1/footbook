@@ -16,7 +16,7 @@ Footbook is a Spring Boot application for football stadium booking with role-bas
 - Booking creation and status updates
 - User management
 - Redis-backed caching for high-read stadium endpoints
-- Static frontend pages served from `src/main/resources/static/frontend`
+- React frontend served from Spring Boot build output
 
 ## Prerequisites
 
@@ -56,10 +56,18 @@ CREATE DATABASE footbook;
 ./mvnw spring-boot:run
 ```
 
-4. Open app:
+4. Build the React frontend and copy it into Spring Boot static resources:
+
+```bash
+cd frontend-react
+npm install
+npm run build
+```
+
+5. Open app:
 
 - Backend base URL: `http://localhost:8080`
-- Frontend page: `http://localhost:8080/frontend/index.html`
+- React app: `http://localhost:8080/`
 
 ## Build and Test
 
@@ -131,8 +139,8 @@ If Redis is unavailable, caching calls can fail at runtime. Keep Redis running i
   - `repository` Spring Data repositories
   - `entity` JPA entities
   - `config` application configuration
-- `src/main/resources/static/frontend`
-  - HTML/CSS/JS frontend pages
+- `frontend-react`
+  - React UI (build output served from `src/main/resources/static`)
 
 ## Known Operational Notes
 

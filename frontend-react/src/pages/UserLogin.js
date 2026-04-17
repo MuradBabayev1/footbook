@@ -3,8 +3,8 @@ import { useNavigate } from "react-router-dom";
 import "../styles/user-login.css";
 
 const API_BASE = "/api/auth";
-const ownerDashboardPath = "/frontend/owner-dashboard.html";
-const userDashboardPath = "/frontend/user-dashboard.html";
+const ownerDashboardPath = "/owner-dashboard";
+const userDashboardPath = "/user-dashboard";
 
 function UserLogin() {
   const navigate = useNavigate();
@@ -27,10 +27,12 @@ function UserLogin() {
       try {
         const existingUser = JSON.parse(existingUserRaw);
         const existingRole = String(existingUser.role || "USER").toUpperCase();
-        window.location.href =
-          existingRole === "OWNER" ? ownerDashboardPath : userDashboardPath;
+        navigate(
+          existingRole === "OWNER" ? ownerDashboardPath : userDashboardPath,
+          { replace: true }
+        );
       } catch (error) {
-        window.location.href = userDashboardPath;
+        navigate(userDashboardPath, { replace: true });
       }
     }
   }, [navigate]);
@@ -92,7 +94,7 @@ function UserLogin() {
       setStatus({ message: "Login successful. Redirecting...", type: "ok" });
 
       window.setTimeout(() => {
-        window.location.href = role === "OWNER" ? ownerDashboardPath : userDashboardPath;
+        navigate(role === "OWNER" ? ownerDashboardPath : userDashboardPath);
       }, 400);
     } catch (error) {
       setStatus({ message: "Server unreachable. Please try again.", type: "error" });
