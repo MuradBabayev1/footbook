@@ -10,6 +10,25 @@ export function getStadiumById(stadiumId) {
   return apiRequest(`${BASE}/${stadiumId}`);
 }
 
+export function uploadStadiumPicture(file, token) {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  return fetch(`${BASE}/upload-picture`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`
+    },
+    body: formData
+  }).then(response => {
+    return response.json().then(data => ({
+      ok: response.ok,
+      status: response.status,
+      data: data
+    }));
+  });
+}
+
 export function createStadium(payload) {
   return apiRequest(BASE, { method: "POST", body: payload });
 }

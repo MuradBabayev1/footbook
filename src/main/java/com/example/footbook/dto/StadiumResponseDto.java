@@ -11,6 +11,7 @@ public class StadiumResponseDto {
     private Integer capacity;
     private Boolean available;
     private Long ownerId;
+    private String pictureUrl;
 
     public StadiumResponseDto() {
     }
@@ -71,6 +72,14 @@ public class StadiumResponseDto {
         this.ownerId = ownerId;
     }
 
+    public String getPictureUrl() {
+        return pictureUrl;
+    }
+
+    public void setPictureUrl(String pictureUrl) {
+        this.pictureUrl = pictureUrl;
+    }
+
     public static StadiumResponseDto fromEntity(Stadium stadium) {
         StadiumResponseDto dto = new StadiumResponseDto();
         dto.setId(stadium.getId());
@@ -80,6 +89,7 @@ public class StadiumResponseDto {
         dto.setCapacity(stadium.getCapacity());
         dto.setAvailable(stadium.getAvailable());
         dto.setOwnerId(stadium.getOwnerId());
+        dto.setPictureUrl(stadium.getPictureUrl());
         return dto;
     }
 }

@@ -8,7 +8,8 @@ import {
   deleteStadium,
   getAllStadiums,
   getStadiumById,
-  updateStadium
+  updateStadium,
+  uploadStadiumPicture
 } from "../services/stadiumService";
 import { deleteUser, getAllUsers } from "../services/userService";
 
@@ -18,7 +19,9 @@ const emptyForm = {
   city: "",
   location: "",
   capacity: "",
-  available: "true"
+  available: "true",
+  pictureUrl: "",
+  picturePreview: ""
 };
 
 function AdminPanel() {
@@ -203,7 +206,9 @@ function AdminPanel() {
         city: stadium.city || "",
         location: stadium.location || "",
         capacity: stadium.capacity ?? "",
-        available: String(Boolean(stadium.available))
+        available: String(Boolean(stadium.available)),
+        pictureUrl: stadium.pictureUrl || "",
+        picturePreview: stadium.pictureUrl || ""
       });
     } else {
       resetForm();
@@ -226,7 +231,8 @@ function AdminPanel() {
       city: formData.city.trim(),
       location: formData.location.trim(),
       capacity: Number(formData.capacity),
-      available: formData.available === "true"
+      available: formData.available === "true",
+      pictureUrl: formData.pictureUrl || ""
     };
 
     if (!payload.name || !payload.city || !payload.location || !payload.capacity) {
@@ -265,6 +271,35 @@ function AdminPanel() {
       await loadStats();
     } catch (error) {
       setStatusMessage("Unable to save stadium right now.", "error");
+    }
+  };
+
+  const handlePictureChange = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    // Show preview
+    const preview = URL.createObjectURL(file);
+    setFormData({ ...formData, picturePreview: preview });
+
+    // Upload to server
+    try {
+      const token = getAuthToken();
+      const response = await uploadStadiumPicture(file, token);
+
+      if (!response.ok) {
+        setStatusMessage(response.data?.error || "Failed to upload picture", "error");
+        setFormData({ ...formData, pictureUrl: "", picturePreview: "" });
+        return;
+      }
+
+      setFormData({ ...formData, pictureUrl: response.data.pictureUrl });
+      setStatusMessage("Picture uploaded successfully.", "success");
+    } catch (error) {
+      setStatusMessage("Failed to upload picture.", "error");
+      setFormData({ ...formData, pictureUrl: "", picturePreview: "" });
     }
   };
 
@@ -507,6 +542,21 @@ function AdminPanel() {
                   <option value="true">Available</option>
                   <option value="false">Unavailable</option>
                 </select>
+              </div>
+              <div className="field wide">
+                <label htmlFor="picture">Stadium Picture</label>
+                <input
+                  id="picture"
+                  name="picture"
+                  type="file"
+                  accept="image/*"
+                  onChange={handlePictureChange}
+                />
+                {formData.picturePreview && (
+                  <div className="picture-preview">
+                    <img src={formData.picturePreview} alt="Stadium preview" style={{ maxWidth: "200px", maxHeight: "150px", marginTop: "10px" }} />
+                  </div>
+                )}
               </div>
             </div>
 

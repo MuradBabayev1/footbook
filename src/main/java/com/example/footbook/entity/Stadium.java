@@ -35,6 +35,9 @@ public class Stadium {
     @Column(nullable = false)
     private Boolean available = true;
 
+    @Column(name = "picture_url")
+    private String pictureUrl;
+
     @Column(name = "owner_id", insertable = false, updatable = false)
     private Long ownerId;
 
@@ -91,6 +94,14 @@ public class Stadium {
 
     public void setAvailable(Boolean available) {
         this.available = available;
+    }
+
+    public String getPictureUrl() {
+        return pictureUrl;
+    }
+
+    public void setPictureUrl(String pictureUrl) {
+        this.pictureUrl = pictureUrl;
     }
 
     public Owner getOwner() {

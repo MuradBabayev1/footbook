@@ -89,6 +89,9 @@ public class StadiumService {
         stadium.setLocation(requestDto.getLocation());
         stadium.setCapacity(requestDto.getCapacity());
         stadium.setAvailable(requestDto.getAvailable() != null ? requestDto.getAvailable() : true);
+        if (requestDto.getPictureUrl() != null && !requestDto.getPictureUrl().isBlank()) {
+            stadium.setPictureUrl(requestDto.getPictureUrl());
+        }
         stadium.setOwner(owner);
 
         return stadiumRepository.save(stadium);
@@ -117,6 +120,9 @@ public class StadiumService {
             if (requestDto.getAvailable() != null) {
                 stadium.setAvailable(requestDto.getAvailable());
             }
+            if (requestDto.getPictureUrl() != null && !requestDto.getPictureUrl().isBlank()) {
+                stadium.setPictureUrl(requestDto.getPictureUrl());
+            }
             return stadiumRepository.save(stadium);
         });
     }
@@ -143,6 +149,9 @@ public class StadiumService {
             }
             if (requestDto.getAvailable() != null) {
                 stadium.setAvailable(requestDto.getAvailable());
+            }
+            if (requestDto.getPictureUrl() != null && !requestDto.getPictureUrl().isBlank()) {
+                stadium.setPictureUrl(requestDto.getPictureUrl());
             }
             return stadiumRepository.save(stadium);
         });

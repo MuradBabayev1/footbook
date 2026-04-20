@@ -7,6 +7,7 @@ public class StadiumRequestDto {
     private String location;
     private Integer capacity;
     private Boolean available;
+    private String pictureUrl;
 
     public StadiumRequestDto() {
     }
@@ -49,5 +50,13 @@ public class StadiumRequestDto {
 
     public void setAvailable(Boolean available) {
         this.available = available;
+    }
+
+    public String getPictureUrl() {
+        return pictureUrl;
+    }
+
+    public void setPictureUrl(String pictureUrl) {
+        this.pictureUrl = pictureUrl;
     }
 }
