@@ -577,6 +577,7 @@ function AdminPanel() {
             <table aria-label="Stadium catalog">
               <thead>
                 <tr>
+                  <th>Picture</th>
                   <th>Name</th>
                   <th>City</th>
                   <th>Location</th>
@@ -589,6 +590,15 @@ function AdminPanel() {
                 {stadiums.length ? (
                   stadiums.map((stadium) => (
                     <tr key={stadium.id}>
+                      <td>
+                        {stadium.pictureUrl ? (
+                          <img src={stadium.pictureUrl} alt={stadium.name} style={{ width: "60px", height: "60px", objectFit: "cover", borderRadius: "4px" }} />
+                        ) : (
+                          <div style={{ width: "60px", height: "60px", backgroundColor: "#e0e0e0", borderRadius: "4px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                            No image
+                          </div>
+                        )}
+                      </td>
                       <td>{stadium.name || "-"}</td>
                       <td>{stadium.city || "-"}</td>
                       <td>{stadium.location || "-"}</td>
@@ -622,7 +632,7 @@ function AdminPanel() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="6" className="empty-state">
+                    <td colSpan="7" className="empty-state">
                       {ready ? "No stadiums found. Add one to get started." : "Loading stadiums..."}
                     </td>
                   </tr>

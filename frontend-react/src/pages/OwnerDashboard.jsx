@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/owner-dashboard.css";
 import { clearStoredSession, readStoredUser, getAuthToken } from "../services/session";
+import { uploadStadiumPicture } from "../services/stadiumService";
 
 const emptyForm = {
   id: "",
@@ -9,7 +10,9 @@ const emptyForm = {
   city: "",
   location: "",
   capacity: "",
-  available: "true"
+  available: "true",
+  pictureUrl: "",
+  picturePreview: ""
 };
 
 function OwnerDashboard() {
@@ -110,7 +113,9 @@ function OwnerDashboard() {
       city: target.city || "",
       location: target.location || "",
       capacity: target.capacity ?? "",
-      available: String(Boolean(target.available))
+      available: String(Boolean(target.available)),
+      pictureUrl: target.pictureUrl || "",
+      picturePreview: target.pictureUrl || ""
     });
     updateFormStatus("");
   };
@@ -123,7 +128,8 @@ function OwnerDashboard() {
       city: formData.city.trim(),
       location: formData.location.trim(),
       capacity: Number(formData.capacity),
-      available: formData.available === "true"
+      available: formData.available === "true",
+      pictureUrl: formData.pictureUrl || ""
     };
 
     if (!payload.name || !payload.city || !payload.location || !payload.capacity || payload.capacity <= 0) {
@@ -160,6 +166,35 @@ function OwnerDashboard() {
       await loadMyStadiums();
     } catch (error) {
       updateFormStatus("Unable to save stadium right now.", "error");
+    }
+  };
+
+  const handlePictureChange = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    // Show preview
+    const preview = URL.createObjectURL(file);
+    setFormData({ ...formData, picturePreview: preview });
+
+    // Upload to server
+    try {
+      const token = getAuthToken();
+      const response = await uploadStadiumPicture(file, token);
+
+      if (!response.ok) {
+        updateFormStatus(response.data?.error || "Failed to upload picture", "error");
+        setFormData({ ...formData, pictureUrl: "", picturePreview: "" });
+        return;
+      }
+
+      setFormData({ ...formData, pictureUrl: response.data.pictureUrl });
+      updateFormStatus("Picture uploaded successfully.", "ok");
+    } catch (error) {
+      updateFormStatus("Failed to upload picture.", "error");
+      setFormData({ ...formData, pictureUrl: "", picturePreview: "" });
     }
   };
 
