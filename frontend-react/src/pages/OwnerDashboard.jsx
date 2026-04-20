@@ -332,6 +332,21 @@ function OwnerDashboard() {
                 <option value="false">Unavailable</option>
               </select>
             </div>
+            <div className="field full">
+              <label htmlFor="picture">Stadium Picture</label>
+              <input
+                id="picture"
+                name="picture"
+                type="file"
+                accept="image/*"
+                onChange={handlePictureChange}
+              />
+              {formData.picturePreview && (
+                <div className="picture-preview">
+                  <img src={formData.picturePreview} alt="Stadium preview" style={{ maxWidth: "200px", maxHeight: "150px", marginTop: "10px" }} />
+                </div>
+              )}
+            </div>
           </div>
           <div className="actions">
             <button type="submit" className="btn">
@@ -355,6 +370,7 @@ function OwnerDashboard() {
           <table>
             <thead>
               <tr>
+                <th>Picture</th>
                 <th>Name</th>
                 <th>City</th>
                 <th>Location</th>
@@ -367,6 +383,15 @@ function OwnerDashboard() {
               {stadiums.length ? (
                 stadiums.map((stadium) => (
                   <tr key={stadium.id}>
+                    <td>
+                      {stadium.pictureUrl ? (
+                        <img src={stadium.pictureUrl} alt={stadium.name} style={{ width: "60px", height: "60px", objectFit: "cover", borderRadius: "4px" }} />
+                      ) : (
+                        <div style={{ width: "60px", height: "60px", backgroundColor: "#e0e0e0", borderRadius: "4px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          No image
+                        </div>
+                      )}
+                    </td>
                     <td>{stadium.name || "-"}</td>
                     <td>{stadium.city || "-"}</td>
                     <td>{stadium.location || "-"}</td>
@@ -390,7 +415,7 @@ function OwnerDashboard() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="6" className="empty">
+                  <td colSpan="7" className="empty">
                     {ready ? "No stadiums yet. Add your first stadium." : "Loading stadiums..."}
                   </td>
                 </tr>
